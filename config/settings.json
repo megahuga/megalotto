@@ -1,0 +1,14 @@
+{
+  "autoBuy": true,
+  "dryRun": true,
+  "lotto": {
+    "enabled": true,
+    "slots": ["auto", "auto", "auto", "auto", "auto"],
+    "saved": []
+  },
+  "pension": {
+    "enabled": true,
+    "mode": "sameAuto",
+    "saved": ""
+  }
+}

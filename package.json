@@ -1,0 +1,21 @@
+{
+  "name": "megalotto",
+  "version": "0.1.0",
+  "description": "메가로또·메가연금 — 동행복권 로또6/45·연금복권720+ 매주 자동 구매 (GitHub Actions + 대시보드)",
+  "type": "module",
+  "license": "MIT",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "update": "node src/cli.js update",
+    "buy": "node src/cli.js buy",
+    "check": "node src/cli.js check",
+    "test": "node --test \"test/**/*.test.js\"",
+    "dashboard": "node scripts/serve.js"
+  },
+  "dependencies": {
+    "@vercel/blob": "^2.8.2",
+    "playwright": "1.64.1"
+  }
+}

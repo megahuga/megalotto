@@ -1,0 +1,61 @@
+name: 메가로또·메가연금
+
+on:
+  schedule:
+    - cron: "0 22 * * 6"  # 일 07:00 KST  로또 당첨번호 반영·분석·당첨 확인
+    - cron: "30 0 * * 1"  # 월 09:30 KST  이번 주 로또 5게임 + 연금 5장 구매 (정각은 GitHub가 붐벼 늦어지기 쉬움)
+    - cron: "30 11 * * 4" # 목 20:30 KST  연금 당첨번호 반영·당첨 확인
+  workflow_dispatch:
+    inputs:
+      task:
+        description: "할 일"
+        type: choice
+        options: [update, buy, check, diagnose]
+        default: update
+
+permissions:
+  contents: write
+
+concurrency:
+  group: megalotto
+  cancel-in-progress: false
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      - name: 브라우저 준비 (구매·잔액 확인 때만)
+        if: github.event.inputs.task != 'update'
+        run: npx playwright install --with-deps chromium
+
+      - name: 실행
+        env:
+          TASK: ${{ github.event.inputs.task || 'auto' }}
+          EVENT_SCHEDULE: ${{ github.event.schedule }}
+          FORCE: ${{ github.event_name == 'workflow_dispatch' }}
+          DH_USER_ID: ${{ secrets.DH_USER_ID }}
+          DH_PASSWORD: ${{ secrets.DH_PASSWORD }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+        run: node src/cli.js auto
+
+      - name: 결과 저장
+        if: always()
+        run: |
+          git config user.name "megalotto-bot"
+          git config user.email "megalotto-bot@users.noreply.github.com"
+          git add data
+          git diff --cached --quiet || git commit -m "data: $(TZ=Asia/Seoul date '+%Y-%m-%d %H:%M') ${TASK:-auto}"
+          git push
+        env:
+          TASK: ${{ github.event.inputs.task || 'auto' }}

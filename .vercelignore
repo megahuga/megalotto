@@ -1,0 +1,9 @@
+# 사이트에 올리지 않는 것: 개인 구매 기록·상태, 테스트, 실행기 설정
+data/purchases.json
+data/status.json
+data/ledger.json
+test/
+scripts/
+.github/
+.claude/
+node_modules/

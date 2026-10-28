@@ -1,0 +1,8 @@
+node_modules/
+.env
+*.log
+playwright-report/
+.claude/
+
+.vercel
+.env*

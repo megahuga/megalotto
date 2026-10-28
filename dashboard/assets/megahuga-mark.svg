@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="96 96 320 320" role="img" aria-labelledby="title">
+  <title id="title">메가허가AI</title>
+  <rect x="96" y="96" width="320" height="320" rx="68" fill="#0A0F14"/>
+  <path d="M160 160H352V352H160V220" stroke="#FFFFFF" stroke-width="24" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+  <circle cx="256" cy="256" r="48" stroke="#3B82F6" stroke-width="24" fill="none"/>
+  <path d="M256 208V130" stroke="#3B82F6" stroke-width="12" stroke-linecap="round" fill="none"/>
+</svg>

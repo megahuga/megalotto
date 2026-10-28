@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>메가로또 · 메가연금 — 무료 로또·연금복권 자동 구매 | (주)메가허가 AI</title>
+  <meta name="description" content="(주)메가허가 AI가 무료로 공개한 오픈소스. 동행복권 로또6/45와 연금복권720+를 매주 1만 원어치 자동으로 사고, 당첨번호를 분석합니다. 컴퓨터를 꺼 둬도 됩니다." />
+  <meta property="og:title" content="메가로또 · 메가연금 — 무료 로또·연금복권 자동 구매" />
+  <meta property="og:description" content="매주 월요일 오전 9시 30분, 로또 5게임과 연금복권 5장을 알아서 삽니다. 완전 무료, 결제창 없음, 소스 전부 공개." />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://lotto.mega.ai.kr/dashboard/" />
+  <meta property="og:image" content="https://lotto.mega.ai.kr/dashboard/assets/og.png" />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="630" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta property="og:site_name" content="(주)메가허가 AI" />
+  <link rel="icon" href="assets/megahuga-mark.svg" type="image/svg+xml" />
+  <link rel="apple-touch-icon" href="assets/megahuga-icon.png" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="free-strip"><b>완전 무료</b> · 결제창 없음<span class="long"> · 충주 AI 회사 대표가 회사를 알리려고 직접 쓰던 걸 공개했습니다</span></div>
+  <header class="page-header">
+    <div class="company-lockup">
+      <a href="https://mega.ai.kr" target="_blank" rel="noopener" aria-label="(주)메가허가 AI 회사 홈페이지"><img src="assets/megahuga-icon.png" alt="" width="38" height="38" /></a>
+      <span>
+        <strong><a class="lock-co" href="https://mega.ai.kr" target="_blank" rel="noopener" title="(주)메가허가 AI 회사 홈페이지">(주)메가허가 AI</a><span class="lock-bar">｜</span><a class="lock-app" href="./" data-tab="home" title="메가로또 처음 화면">메가로또</a></strong>
+        <small>로또·연금복권 매주 자동 구매 · 무료</small>
+      </span>
+    </div>
+    <nav class="tabs" id="nav">
+      <button data-tab="home" class="on">이번 주</button>
+      <button data-tab="settings">번호·설정</button>
+      <button data-tab="history">구매현황</button>
+      <button data-tab="draws">당첨번호</button>
+      <button data-tab="analysis">분석</button>
+      <button data-tab="start">시작하기</button>
+    </nav>
+    <button class="action compact" data-tab="start">무료로 시작하기 <span class="arrow">→</span></button>
+  </header>
+  <div class="status-line" id="statusLine"></div>
+  <main id="view"></main>
+  <section class="feedback" id="feedback"></section>
+  <section class="maker" id="maker"></section>
+  <footer class="page-footer" id="footer"></footer>
+  <div class="toast" id="toast"></div>
+  <dialog id="dialog"></dialog>
+  <script type="module" src="app.js"></script>
+</body>
+</html>
