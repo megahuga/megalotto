@@ -496,3 +496,8 @@ dialog::backdrop { background: rgba(23, 32, 32, 0.55); }
 .gh-ok, .gh-bad { display: inline-grid; place-items: center; width: 20px; height: 20px; border-radius: 50%; color: #fff; font-size: 12px; font-weight: 900; background: #1f883d; }
 .gh-bad { background: #cf222e; }
 @media (max-width: 640px) { .gh-pair, .gh-finder { grid-template-columns: 1fr; } }
+
+.buy-now { display: flex; gap: 10px; align-items: flex-start; background: #fffbea; border: 1px solid #f0d77a; border-radius: 4px; padding: 12px 14px; margin-top: 10px; cursor: pointer; }
+.buy-now input { margin-top: 4px; width: 18px; height: 18px; flex: none; }
+.buy-now span { display: flex; flex-direction: column; gap: 2px; }
+.buy-now small { color: var(--sub); font-size: 13px; }

@@ -781,7 +781,7 @@ function renderStart() {
           </ol>
           <p class="help">버튼이 안 되면: 내 저장소 위쪽 <code>Actions</code> → 왼쪽 <code>메가로또·메가연금</code></p></div></div>
         <div class="step"><div><h3>이 화면에 연결</h3><p>설정 화면에서 <b>GitHub 열쇠 만들기</b>를 누르고, 만든 열쇠를 붙여 넣으면 끝입니다. 내 메가로또 저장소는 화면이 알아서 찾습니다.</p><div class="actions"><button class="action compact" data-tab="settings">설정에서 연결하기 →</button></div></div></div></div>
-        <div class="step"><div><h3>실제 구매 켜기</h3><p>설정에서 번호 방식을 고르고 <b>실제 구매</b>를 켠 뒤 저장하면, 다음 월요일 오전 9시 30분부터 매주 알아서 삽니다.</p></div></div>
+        <div class="step"><div><h3>실제 구매 켜기</h3><p>설정에서 번호 방식을 고르고 <b>실제 구매</b>를 켠 뒤 저장하면 매주 월요일 오전 9시 30분에 알아서 삽니다. 이번 주 것을 아직 안 샀다면 저장하자마자 바로 사도록 고를 수 있어요.</p></div></div>
       </div>
 
     </div>
@@ -1023,12 +1023,21 @@ function addSavedLotto(game) {
   render();
 }
 
+/** 이번 주 로또를 아직 안 샀고, 지금 판매 시간이면(토 20시~일 6시 제외) 바로 살 수 있다 */
+function canBuyThisWeekNow() {
+  const k = kstNow();
+  const day = k.getUTCDay();
+  const h = k.getUTCHours();
+  if ((day === 6 && h >= 20) || (day === 0 && h < 6)) return false;
+  return weekStatus("lotto", currentLottoRound().round) !== "구매 완료";
+}
+
 function confirmReal() {
   return new Promise((resolve) => {
     const dlg = $("#dialog");
-    dlg.innerHTML = `<h3 style="margin:0 0 8px">실제 구매를 켤까요?</h3><p style="margin:0 0 8px">매주 월요일 오전 9시 30분에 동행복권 예치금으로 실제로 삽니다.<br />로또 최대 5,000원 + 연금 5,000원 = <b>한 주 최대 10,000원</b></p><p class="help">예치금은 동행복권에서 미리 충전해 두세요. 산 복권은 취소할 수 없습니다.</p><div class="actions mt"><button class="action compact" id="yes">켜기</button><button class="action compact secondary" id="no">취소</button></div>`;
+    dlg.innerHTML = `<h3 style="margin:0 0 8px">실제 구매를 켤까요?</h3><p style="margin:0 0 8px">매주 월요일 오전 9시 30분에 동행복권 예치금으로 실제로 삽니다.<br />로또 최대 5,000원 + 연금 5,000원 = <b>한 주 최대 10,000원</b></p><p class="help">예치금은 동행복권에서 미리 충전해 두세요. 산 복권은 취소할 수 없습니다.</p>${state.conn && canBuyThisWeekNow() ? `<label class="buy-now"><input type="checkbox" id="buyNow" checked /><span><b>이번 주 것은 저장하면 바로 사기</b><small>월요일까지 기다리지 않고, 아직 안 산 이번 주 복권을 지금 삽니다.</small></span></label>` : ""}<div class="actions mt"><button class="action compact" id="yes">켜기</button><button class="action compact secondary" id="no">취소</button></div>`;
     dlg.onclick = (e) => {
-      if (e.target.id === "yes") (dlg.close(), resolve(true));
+      if (e.target.id === "yes") ((state.buyNow = !!dlg.querySelector("#buyNow")?.checked), dlg.close(), resolve(true));
       if (e.target.id === "no") (dlg.close(), resolve(false));
     };
     dlg.showModal();
@@ -1090,6 +1099,11 @@ document.addEventListener("click", async (e) => {
       await saveSettings(next);
       state.draft = structuredClone(next);
       render();
+      if (state.conn && state.buyNow && next.autoBuy && !next.dryRun) {
+        state.buyNow = false;
+        await runTask("buy");
+        toast("이번 주 복권을 지금 사는 중이에요. 2~3분 뒤 구매현황에서 확인하세요");
+      }
     } else if (t.id === "resetDraft") (state.draft = structuredClone(state.settings)), render();
     else if (t.id === "connect") {
       const token = $("#cToken").value.trim();
@@ -1130,6 +1144,7 @@ document.addEventListener("change", async (e) => {
     d.lotto.slots = Array.from({ length: n }, (_, i) => d.lotto.slots[i] ?? "auto");
     render();
   } else if (t.name === "runmode") {
+    state.buyNow = false;
     if (t.value === "buy" && !(await confirmReal())) return render();
     d.autoBuy = t.value !== "stop";
     d.dryRun = t.value !== "buy";
