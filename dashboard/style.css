@@ -507,3 +507,10 @@ dialog::backdrop { background: rgba(23, 32, 32, 0.55); }
 .stop-guide ol { margin: 8px 0 6px; padding-left: 20px; display: grid; gap: 6px; }
 .stop-guide code { background: #fff; padding: 1px 5px; border-radius: 3px; font-size: 13px; }
 .stop-guide small { color: var(--sub); }
+
+.terms-note { background: #fff8e6; border: 1px solid #f0d48a; border-left: 5px solid #dd9c00; border-radius: 4px; padding: 14px 16px; margin: 0 0 18px; font-size: 14.5px; line-height: 1.65; }
+.terms-note > b { font-size: 16px; color: #8a5a00; }
+.terms-note p { margin: 8px 0 0; }
+details .terms-note { margin: 10px 0 4px; }
+.terms-mini { margin-top: 10px; font-size: 13.5px; color: #8a5a00; }
+.terms-mini a { color: inherit; font-weight: 800; text-decoration: underline; }

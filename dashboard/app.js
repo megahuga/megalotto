@@ -376,7 +376,8 @@ function renderHome() {
        <h1>매주 복권 사기,<br />이제 잊어버리세요</h1>
        <p class="lead">매주 사러 가기 귀찮은 분을 위해 만들었습니다. 월요일 오전 9시 30분, 내 동행복권 계정으로 로또 5게임과 연금복권 5장을 대신 삽니다. 번호는 <b>자동</b>으로 두거나 <b>내 번호</b>를 정해 두면 끝. 컴퓨터를 꺼 둬도 됩니다.</p>
        <div class="actions"><button class="action" data-tab="start">무료로 시작하기 <span class="arrow">→</span></button><a class="action secondary" href="#picks">번호 고르는 법 보기</a></div>
-       <p class="hero-note">충주에서 AI 회사를 하는 대표가, 회사를 알리려고 직접 쓰던 걸 무료로 공개했습니다. 내 GitHub에서 돌아가서 <b>저희는 돈도 받을 수 없고, 비밀번호도 볼 수 없습니다.</b></p>`;
+       <p class="hero-note">충주에서 AI 회사를 하는 대표가, 회사를 알리려고 직접 쓰던 걸 무료로 공개했습니다. 내 GitHub에서 돌아가서 <b>저희는 돈도 받을 수 없고, 비밀번호도 볼 수 없습니다.</b></p>
+       <p class="terms-mini">⚠️ 자동 구매는 동행복권 이용약관상 <b>계정 이용 제한 사유</b>가 될 수 있습니다. <a href="#terms" data-tab="start">쓰기 전에 읽기</a></p>`;
 
   const facts = state.conn
     ? [
@@ -758,6 +759,7 @@ function secretMock(order, name, what, sample) {
 function renderStart() {
   return `${pageTitle("무료로 시작하기", "10분이면 내 메가로또가 생깁니다", "필요한 것: GitHub 계정(무료), 동행복권 계정과 예치금. 프로그램 설치는 없습니다.")}
     <div class="container page-body">
+      ${termsNote()}
       <div class="steps">
         <div class="step"><div><h3>GitHub 가입</h3><p>프로그램이 돌아갈 무료 공간입니다. 이미 있으면 건너뛰세요.</p><div class="actions">${ext("https://github.com/signup", "GitHub 가입하기 →", "action compact secondary")}</div></div></div>
         <div class="step"><div><h3>메가로또를 내 계정으로 복사</h3><p>버튼을 누르면 이름(my-megalotto)과 <b>비공개(Private)</b>가 이미 골라져 있어요. 초록색 <b>Create repository</b>만 누르면 됩니다. 비공개라 구매 기록이 남에게 보이지 않습니다.</p><div class="actions">${ext(COPY_URL, "내 저장소로 복사하기 →", "action compact")}</div></div></div>
@@ -799,6 +801,7 @@ function renderStart() {
           <details><summary>컴퓨터를 켜 둬야 하나요?</summary><p>아니요. GitHub 서버가 정해진 시간에 실행합니다. 휴대폰으로 이 화면을 열어 확인만 하면 됩니다.</p></details>
           <details><summary>분석번호를 사면 더 잘 맞나요?</summary><p>아니요. 로또·연금복권 추첨은 매 회차가 서로 영향을 주지 않는 <b>독립시행</b>이라, 어떤 번호든 당첨 확률은 똑같습니다(로또 1등 814만 5,060분의 1). 분석번호는 지난 당첨 흐름을 참고해 번호 고르는 수고를 덜어 주는 방법일 뿐입니다. 내 번호·자동과 섞어 쓸 수 있어요.</p></details><details><summary>잘못 사지거나 손해가 나면 누가 책임지나요?</summary><p>메가로또는 무료로 공개한 비공식 프로그램이라, (주)메가허가에이아이는 구매·당첨 결과, 금전 손실, 계정 문제, 동행복권 사이트가 바뀌어 생긴 오류에 대해 책임지지 않습니다. 처음엔 시험 실행으로 확인하고, 한 주 최대 1만 원 안에서만 쓰세요. 산 복권은 취소할 수 없습니다.</p></details>
           <details><summary>한 주에 얼마까지 사나요?</summary><p>로또 최대 5게임(5,000원) + 연금복권 5장(5,000원), 최대 1만 원입니다. 동행복권 인터넷 구매 한도(로또는 회차당 5천 원) 안에서만 삽니다.</p></details>
+          <details><summary>동행복권 약관상 문제는 없나요?</summary>${termsNote()}</details>
           <details><summary>동행복권 공식 프로그램인가요?</summary><p>아니요. 동행복권과 관계없는 비공식 오픈소스입니다. 동행복권 사이트가 바뀌면 구매가 실패할 수 있고, 실패하면 사지 않고 알려 줍니다.</p></details>
         </div>
       </div>
@@ -965,7 +968,7 @@ function renderMaker() {
 function renderFooter() {
   return `<div class="container">
     <div><strong>(주)메가허가에이아이</strong> · 충북 충주<br />${ext("https://mega.ai.kr", "mega.ai.kr")} · <a href="mailto:contact@mega.ai.kr">contact@mega.ai.kr</a></div>
-    <div class="disc"><b>꼭 읽어 주세요.</b> 로또와 연금복권 추첨은 매 회차가 <b>독립시행</b>입니다. 지난 당첨번호는 다음 추첨에 아무 영향을 주지 않으며, 분석번호를 포함한 어떤 방식도 당첨 확률을 높이거나 당첨을 보장하지 않습니다. 메가로또·메가연금은 동행복권과 관계없는 비공식 오픈소스(MIT)이며, (주)메가허가에이아이는 이 프로그램 사용으로 생긴 구매·당첨 결과, 금전 손실, 계정 문제, 동행복권 사이트 변경에 따른 오류에 대해 책임지지 않습니다. 복권은 여유 돈으로, 정해 둔 금액만 즐겨 주세요.</div>
+    <div class="disc"><b>꼭 읽어 주세요.</b> 로또와 연금복권 추첨은 매 회차가 <b>독립시행</b>입니다. 지난 당첨번호는 다음 추첨에 아무 영향을 주지 않으며, 분석번호를 포함한 어떤 방식도 당첨 확률을 높이거나 당첨을 보장하지 않습니다. 메가로또·메가연금은 동행복권과 관계없는 비공식 오픈소스(MIT)이며, (주)메가허가에이아이는 이 프로그램 사용으로 생긴 구매·당첨 결과, 금전 손실, 계정 문제, 동행복권 사이트 변경에 따른 오류에 대해 책임지지 않습니다. 자동 구매는 동행복권 이용약관 제12조(비정상적 이용·규칙적 호출 금지)에 해당할 수 있어 계정 이용 제한·해지 사유가 될 수 있으며, 사용 여부와 결과는 이용자 본인이 판단하고 책임집니다. 복권은 여유 돈으로, 정해 둔 금액만 즐겨 주세요.</div>
   </div>`;
 }
 
@@ -1032,6 +1035,13 @@ function canBuyThisWeekNow() {
   const h = k.getUTCHours();
   if ((day === 6 && h >= 20) || (day === 0 && h < 6)) return false;
   return weekStatus("lotto", currentLottoRound().round) !== "구매 완료";
+}
+
+/** 동행복권 이용약관 안내 (첫 화면·시작하기·자주 묻는 질문에 같이 쓴다) */
+function termsNote() {
+  return `<div class="terms-note" id="terms"><b>⚠️ 쓰기 전에 꼭 읽어 주세요: 동행복권 이용약관</b>
+    <p>동행복권 사이트 이용약관 제12조는 회사가 정한 방법이 아닌 <b>비정상적인 방법의 서비스 이용</b>(1호)과 <b>특정 기능을 반복적·규칙적으로 호출하는 행위</b>(9호)를 금지하고, 어기면 <b>이용 제한·이용계약 해지</b>를 할 수 있다고 정하고 있습니다(제12조②·제13조). 정해진 시간에 자동으로 로그인해 사는 이 프로그램은 여기에 해당한다고 볼 수 있어, <b>내 동행복권 계정이 정지될 수 있습니다.</b></p>
+    <p>메가로또는 구매대행이나 유료 서비스가 아니라, 개인적으로 쓰던 자동구매 프로그램의 소스를 무료로 공개한 것입니다. 쓸지 말지와 그 결과는 이용자 본인이 판단하고 책임집니다. 걱정되면 자동 구매는 끄고(<b>잠시 멈추기</b>) 번호 추천·당첨 확인만 쓰셔도 됩니다.</p></div>`;
 }
 
 /** 그만 사고 싶을 때 안내 (설정·시작하기·자주 묻는 질문에 같이 쓴다) */
