@@ -1,67 +1,70 @@
+<p align="center"><img src="docs/images/hero.png" alt="메가로또 · 메가연금 — 매주 복권 사기, 이제 잊어버리세요" width="760" /></p>
+
 # 메가로또 · 메가연금
 
-**무료 오픈소스 · 이용료 0원** — [(주)메가허가 AI](https://mega.ai.kr) 대표가 직접 쓰려고 만들어 공개했습니다.
+**완전 무료 · 결제창 없음 · 소스 전부 공개** — 충주에서 AI 회사를 하는 대표가, 회사를 알리려고 직접 쓰던 걸 공개했습니다.
 
-동행복권 **로또6/45**와 **연금복권720+**를 매주 자동으로 사 주는 프로그램입니다.
-내 컴퓨터를 켜 둘 필요가 없습니다. GitHub가 정해진 시간에 대신 실행합니다.
+매주 **월요일 오전 9시 30분**, 내 동행복권 계정으로 **로또 5게임 + 연금복권 5장(한 주 1만 원)** 을 알아서 삽니다.
+프로그램 설치가 없고, 컴퓨터를 꺼 둬도 됩니다. 내 GitHub가 정해진 시간에 대신 실행합니다.
 
-- 매주 **월요일 오전 9시 30분**: 로또 5게임(5,000원) + 연금복권 5장(5,000원) = **한 주 1만 원**
-- 번호 방식: **분석번호**(매주 당첨번호 분석) · **저장번호**(내가 정한 번호) · **무작위** · **동행복권 자동**, 게임마다 고를 수 있음
-- 연금복권: 1~5조 같은 번호 세트(자동·분석·저장번호) 또는 조마다 다른 자동번호 5장
-- 매주 당첨번호를 받아 분석하고, 산 번호의 당첨 여부를 확인
-- 대시보드: 이번 주 번호 · 당첨번호 조회 · 분석 리포트 · 구매현황 · 설정을 휴대폰에서도 볼 수 있음
+> 👉 **GitHub가 처음이시면 [lotto.mega.ai.kr](https://lotto.mega.ai.kr) → [시작하기]를 따라 하세요.**
+> 예시 화면과 바로 가기 버튼이 있어서, GitHub를 처음 들어 본 분도 30분 안에 끝냈습니다.
 
-> 추첨은 무작위이며 당첨을 보장하지 않습니다. 구매 결과에 대한 책임은 사용자에게 있습니다.
-> 메가로또는 동행복권과 관계없는 비공식 프로그램입니다.
+<p align="center"><a href="https://github.com/new?template_owner=megahuga&template_name=megalotto&name=my-megalotto&visibility=private"><b>▶ 내 저장소로 복사하기 (비공개로 자동 선택)</b></a></p>
 
-## 비용
+## 이런 화면에서 봅니다
 
-**무료입니다.** 내 GitHub 계정의 무료 실행 시간(비공개 저장소 기준 월 2,000분) 안에서 돌아갑니다. 한 달에 약 30~60분을 씁니다.
-복권 값만 동행복권 예치금에서 나갑니다.
+<p align="center"><img src="docs/images/screen.png" alt="메가로또 대시보드 화면" width="760" /></p>
 
-## 시작하기 (약 10분)
+- 이번 주 번호 · 당첨번호 조회 · 분석 리포트 · 구매현황 · 설정을 한 화면에서, 휴대폰에서도 봅니다
+- 번호 방식은 게임마다 고릅니다: **분석번호 · 저장번호(내가 정한 번호) · 무작위 · 동행복권 자동**
+- 로또 게임 수 줄이기, 연금복권 끄기도 됩니다
 
-### 1. 내 저장소 만들기
-[여기를 눌러 내 계정으로 복사](https://github.com/new?template_owner=megahuga&template_name=megalotto&name=my-megalotto&visibility=private)하세요. 이름과 **비공개(Private)** 가 미리 골라져 있어 **Create repository**만 누르면 됩니다. (직접 하려면 위쪽 **Use this template → Create a new repository**에서 **Private**로 만드세요.)
-구매 기록과 당첨 결과는 내 저장소에만 쌓입니다.
+## 왜 무료고, 비밀번호는 안전한가요
 
-### 2. 동행복권 계정 넣기
-내 저장소 **Settings → Secrets and variables → Actions → New repository secret**에서 두 개를 넣습니다.
+<p align="center"><img src="docs/images/safe.png" alt="내 GitHub에서 동행복권으로 바로 갑니다. 메가허가 서버는 중간에 없습니다" width="760" /></p>
 
-| 이름 | 값 |
-|---|---|
-| `DH_USER_ID` | 동행복권 아이디 |
-| `DH_PASSWORD` | 동행복권 비밀번호 |
+- 각자 **내 GitHub(비공개 저장소)** 에 복사해서 **그 안에서만** 돌아갑니다. 저희 서버를 거치지 않습니다.
+- 그래서 저희는 **돈을 받을 방법도, 비밀번호를 볼 방법도 없습니다.** 나중에 유료가 될 수도 없는 구조입니다.
+- 동행복권 아이디·비밀번호는 GitHub **비밀 보관함(Secrets)** 에 암호화돼 들어갑니다. 넣은 본인도 다시 못 보고, 실행 기록에도 `***`로 가려집니다.
+- GitHub 무료 계정으로 충분합니다. 한 달 실행 시간 30~60분(무료 한도 2,000분). 복권 값만 동행복권 예치금에서 나갑니다.
 
-비밀값은 GitHub가 암호화해 보관하고, 실행 기록에도 보이지 않습니다.
-(선택) 텔레그램으로 결과를 받으려면 `TELEGRAM_BOT_TOKEN`, `TELEGRAM_CHAT_ID`도 넣으세요. 넣지 않아도 실패하면 GitHub가 메일로 알려 줍니다.
+## 설정 순서 (10~30분, 한 번만)
 
-### 3. 예치금 충전
-인터넷 구매는 동행복권 예치금으로만 됩니다. 한 달에 4~5만 원을 미리 충전해 두세요.
-(충전은 자동으로 하지 않습니다. 보안 키패드를 뚫는 방식은 쓰지 않습니다.)
+<p align="center"><img src="docs/images/steps.png" alt="설정 순서 6단계" width="760" /></p>
 
-### 4. 시험 실행
-내 저장소 **Actions → 메가로또·메가연금 → Run workflow**에서
+1. **GitHub 가입** — 무료. 이미 있으면 건너뛰기
+2. **[내 저장소로 복사하기](https://github.com/new?template_owner=megahuga&template_name=megalotto&name=my-megalotto&visibility=private)** — 이름과 비공개(Private)가 미리 골라져 있어요. 초록색 **Create repository**만 누르면 됩니다
+3. **동행복권 아이디·비밀번호 넣기** — 내 저장소 **Settings → Secrets and variables → Actions → New repository secret**에서 한 칸씩 두 번
 
-1. `update`: 당첨번호 받기와 분석
-2. `buy`: 처음에는 **시험 실행**입니다. 로그인·잔액·번호까지만 확인하고 사지 않습니다.
+   | Name | Secret |
+   |---|---|
+   | `DH_USER_ID` | 동행복권 아이디 |
+   | `DH_PASSWORD` | 동행복권 비밀번호 |
 
-초록색 체크가 나오면 준비가 끝났습니다.
+4. **예치금 충전** — 동행복권 사이트에서 미리 1만 원 이상. **예치금이 없으면 사지 않습니다**
+5. **시험 실행 한 번** — 내 저장소 **Actions → 메가로또·메가연금 → Run workflow** → 할 일을 `buy`로 → 초록색 **Run workflow**. 처음엔 시험 모드라 로그인·잔액·번호까지만 확인하고 사지 않습니다. 초록 체크 ✓가 뜨면 준비 끝
+6. **실제 구매 켜기** — [lotto.mega.ai.kr](https://lotto.mega.ai.kr) **설정 → 내 저장소 연결** 후 **자동으로 사기**를 고르고 저장. 이번 주 것을 아직 안 샀다면 저장하자마자 바로 사게 할 수도 있어요
 
-### 5. 대시보드 연결
-대시보드 주소: `https://<원본 저장소 주인>.github.io/<저장소 이름>/dashboard/`
-(내 컴퓨터에서 보려면 `npm run dashboard` → http://localhost:5178/dashboard/)
+<details>
+<summary>내 저장소 연결에 필요한 토큰 만드는 법</summary>
 
-**설정 → 내 저장소 연결**에 GitHub 아이디·저장소 이름·토큰을 넣습니다.
-토큰 만드는 법: GitHub **Settings → Developer settings → Fine-grained tokens → Generate new token**
+GitHub **Settings → Developer settings → Fine-grained tokens → Generate new token**
 
 - Repository access: **Only select repositories** → 내 메가로또 저장소 하나만
 - Permissions: **Contents** 읽기/쓰기, **Actions** 읽기/쓰기
 
 토큰은 그 브라우저에만 저장되고 GitHub 말고 다른 곳으로 보내지 않습니다.
+(선택) 텔레그램으로 결과를 받으려면 Secrets에 `TELEGRAM_BOT_TOKEN`, `TELEGRAM_CHAT_ID`도 넣으세요. 넣지 않아도 실패하면 GitHub가 메일로 알려 줍니다.
+</details>
 
-### 6. 실제 구매 켜기
-대시보드 **설정 → 실제 구매**를 켜고 **설정 저장**을 누르면, 다음 월요일 오전 9시 30분부터 실제로 삽니다.
+## ✋ 그만 사고 싶으면
+
+1. **가장 쉬움:** 대시보드 **번호·설정**에서 **잠시 멈추기** → 저장. 당첨번호 확인은 계속합니다.
+2. **GitHub에서 통째로 끄기:** 내 저장소 `Actions` → 왼쪽 `메가로또·메가연금` → 오른쪽 위 `⋯` → `Disable workflow` (다시 켜려면 `Enable workflow`)
+3. **완전히 그만두기:** 내 저장소 `Settings` 맨 아래 `Delete this repository`. 남은 예치금은 동행복권에서 출금하세요.
+
+이미 산 복권은 어떤 방법으로도 취소할 수 없습니다(동행복권 규정).
 
 ## 자동 일정 (한국 시간)
 
@@ -83,13 +86,20 @@ GitHub 예약 실행은 몇 분~수십 분 늦게 시작될 수 있습니다.
 | 무작위 | 구매할 때 새로 뽑습니다. |
 | 자동 | 동행복권 자동번호로 삽니다. |
 
+연금복권은 1~5조 같은 번호 세트(자동·분석·저장번호) 또는 조마다 다른 자동번호 5장 중에 고릅니다.
+
 ## 알아 둘 것
 
-- 인터넷 구매 한도: 로또는 한 회차 1인당 5천 원, 연금복권은 하루 15만 원(동행복권 안내 기준). 이 프로그램은 한 주 최대 1만 원만 삽니다.
+- **당첨 확률을 올려 주는 프로그램이 아닙니다.** 복권은 매 회차 독립시행이라 어떤 번호든 확률이 같습니다. "사러 가는 귀찮음"을 없애 주는 프로그램입니다.
+- 인터넷 구매는 만 19세 이상. 한도: 로또는 한 회차 1인당 5천 원, 연금복권은 하루 15만 원(동행복권 안내 기준). 이 프로그램은 한 주 최대 1만 원만 삽니다.
+- 예치금 충전은 자동으로 하지 않습니다. 보안 키패드를 뚫는 방식은 쓰지 않습니다.
 - 동행복권 사이트가 바뀌면 구매가 실패할 수 있습니다. 실패하면 사지 않고 알립니다.
 - GitHub 서버는 해외에 있습니다. 동행복권이 접속을 막으면 실행 기록에 "접속을 막았습니다"가 뜹니다.
 - 연금복권은 번호마다 한 장뿐이라, 저장번호로 고른 번호가 이미 팔렸으면 그 주 연금 구매가 실패할 수 있습니다.
 - 자동 구매 프로그램 사용이 동행복권 이용약관에 맞는지는 각자 확인하세요.
+
+> 추첨은 무작위이며 당첨을 보장하지 않습니다. 구매 결과에 대한 책임은 사용자에게 있습니다.
+> 메가로또는 동행복권과 관계없는 비공식 프로그램입니다.
 
 ## 개발
 
@@ -98,7 +108,7 @@ npm install
 npm test                    # 테스트
 node src/cli.js update      # 당첨번호 받기 + 분석
 DH_USER_ID=... DH_PASSWORD=... node src/cli.js buy   # config/settings.json의 dryRun이 true면 시험만
-npm run dashboard           # 대시보드
+npm run dashboard           # 대시보드 (http://localhost:5178/dashboard/)
 ```
 
 | 파일 | 하는 일 |
@@ -121,6 +131,8 @@ npm run dashboard           # 대시보드
 - [mega.ai.kr](https://mega.ai.kr) · 업무 자동화, AI 검색 홈페이지
 - [모두의 안전안내](https://safe.mega.ai.kr) · 공공기관 현장에서 쓰고 있는 매일 안전 브리핑
 - 문의: contact@mega.ai.kr
+
+써 보시고 괜찮으면 오른쪽 위 **⭐ Star** 하나 눌러 주세요. 큰 힘이 됩니다.
 
 ## 라이선스
 
