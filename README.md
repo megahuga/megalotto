@@ -22,7 +22,7 @@
 ## 시작하기 (약 10분)
 
 ### 1. 내 저장소 만들기
-이 저장소 위쪽 **Use this template → Create a new repository**를 누르고, 반드시 **Private(비공개)** 로 만드세요.
+[여기를 눌러 내 계정으로 복사](https://github.com/new?template_owner=megahuga&template_name=megalotto&name=my-megalotto&visibility=private)하세요. 이름과 **비공개(Private)** 가 미리 골라져 있어 **Create repository**만 누르면 됩니다. (직접 하려면 위쪽 **Use this template → Create a new repository**에서 **Private**로 만드세요.)
 구매 기록과 당첨 결과는 내 저장소에만 쌓입니다.
 
 ### 2. 동행복권 계정 넣기

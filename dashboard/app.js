@@ -9,6 +9,8 @@ import { makeNickname, WALL_PHRASES } from "../src/wall.js";
 
 // 원본 저장소 주소 (GitHub에 올린 뒤 정한 주소로 맞춘다)
 const PROJECT_REPO = "https://github.com/megahuga/megalotto";
+// 복사 화면을 이름·비공개가 미리 골라진 채로 연다 (GitHub 기본값은 공개라서)
+const COPY_URL = "https://github.com/new?template_owner=megahuga&template_name=megalotto&name=my-megalotto&visibility=private";
 
 const $ = (sel, root = document) => root.querySelector(sel);
 const esc = (v) => String(v ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]);
@@ -730,7 +732,7 @@ function renderStart() {
     <div class="container page-body">
       <div class="steps">
         <div class="step"><div><h3>GitHub 가입</h3><p>프로그램이 돌아갈 무료 공간입니다. 이미 있으면 건너뛰세요.</p><div class="actions">${ext("https://github.com/signup", "GitHub 가입하기 →", "action compact secondary")}</div></div></div>
-        <div class="step"><div><h3>메가로또를 내 계정으로 복사</h3><p>버튼을 누르고 저장소 이름을 정한 뒤, 꼭 <b>Private(비공개)</b>을 고르고 만드세요. 구매 기록이 남에게 보이지 않습니다.</p><div class="actions">${ext(`${PROJECT_REPO}/generate`, "내 저장소로 복사하기 →", "action compact")}</div></div></div>
+        <div class="step"><div><h3>메가로또를 내 계정으로 복사</h3><p>버튼을 누르면 이름(my-megalotto)과 <b>비공개(Private)</b>가 이미 골라져 있어요. 초록색 <b>Create repository</b>만 누르면 됩니다. 비공개라 구매 기록이 남에게 보이지 않습니다.</p><div class="actions">${ext(COPY_URL, "내 저장소로 복사하기 →", "action compact")}</div></div></div>
         <div class="step"><div><h3>동행복권 계정 넣기</h3><p>내 저장소 <code>Settings → Secrets and variables → Actions → New repository secret</code>에서 두 개를 넣습니다. GitHub에 로그인한 상태여야 이 화면이 열립니다.</p>
           <table><tr><td><code>DH_USER_ID</code></td><td>동행복권 아이디</td></tr><tr><td><code>DH_PASSWORD</code></td><td>동행복권 비밀번호</td></tr></table>
           <div class="lock-note"><b>🔒 넣는 순간 암호화됩니다</b><ul><li>GitHub가 비밀값을 암호화해 금고에 보관합니다. 저장한 뒤에는 <b>나도 다시 볼 수 없고</b> 바꾸거나 지울 수만 있습니다.</li><li>자동 구매가 돌 때만 잠깐 꺼내 쓰고, 실행 기록에는 <code>***</code>로 가려집니다.</li><li>메가허가를 포함해 <b>누구의 서버에도 전달되지 않습니다.</b> 내 GitHub 계정만 지키면 됩니다.</li></ul></div></div></div>
