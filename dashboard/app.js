@@ -725,6 +725,33 @@ function renderSettings() {
     </div>`;
 }
 
+/* ---------- 시작하기: 내 저장소로 바로 가는 링크·예시 화면 ---------- */
+
+function ghRepo() {
+  const v = loadJson("megalotto.ghRepo") ?? {};
+  return { user: v.user ?? "", repo: v.repo || "my-megalotto" };
+}
+
+function ghLink(kind) {
+  const { user, repo } = ghRepo();
+  if (!user) return "https://github.com/";
+  const base = `https://github.com/${encodeURIComponent(user)}/${encodeURIComponent(repo)}`;
+  return kind === "secret" ? `${base}/settings/secrets/actions/new` : `${base}/actions/workflows/megalotto.yml`;
+}
+
+function ghFinder() {
+  const { user, repo } = ghRepo();
+  return `<div class="gh-finder"><label>내 GitHub 아이디<input id="ghUser" value="${esc(user)}" placeholder="예) hong-gildong" autocomplete="off" /></label><label>저장소 이름<input id="ghRepoName" value="${esc(repo)}" autocomplete="off" /></label><p class="help">넣어 두면 아래 버튼이 내 저장소로 바로 갑니다. (이 브라우저에만 저장)</p></div>`;
+}
+
+function secretMock(order, name, what, sample) {
+  return `<figure class="gh-mock"><figcaption>${order} · 예시 화면</figcaption>
+    <div class="gh-title">New secret</div>
+    <div class="gh-label">Name *</div><div class="gh-input name"><code>${name}</code><button class="copy" data-copy="${name}">복사</button></div>
+    <div class="gh-label">Secret *</div><div class="gh-input secret">${sample}<small>${what}</small></div>
+    <span class="gh-btn">Add secret</span></figure>`;
+}
+
 /* ---------- 시작하기 ---------- */
 
 function renderStart() {
@@ -733,11 +760,26 @@ function renderStart() {
       <div class="steps">
         <div class="step"><div><h3>GitHub 가입</h3><p>프로그램이 돌아갈 무료 공간입니다. 이미 있으면 건너뛰세요.</p><div class="actions">${ext("https://github.com/signup", "GitHub 가입하기 →", "action compact secondary")}</div></div></div>
         <div class="step"><div><h3>메가로또를 내 계정으로 복사</h3><p>버튼을 누르면 이름(my-megalotto)과 <b>비공개(Private)</b>가 이미 골라져 있어요. 초록색 <b>Create repository</b>만 누르면 됩니다. 비공개라 구매 기록이 남에게 보이지 않습니다.</p><div class="actions">${ext(COPY_URL, "내 저장소로 복사하기 →", "action compact")}</div></div></div>
-        <div class="step"><div><h3>동행복권 계정 넣기</h3><p>내 저장소 <code>Settings → Secrets and variables → Actions → New repository secret</code>에서 두 개를 넣습니다. GitHub에 로그인한 상태여야 이 화면이 열립니다.</p>
-          <table><tr><td><code>DH_USER_ID</code></td><td>동행복권 아이디</td></tr><tr><td><code>DH_PASSWORD</code></td><td>동행복권 비밀번호</td></tr></table>
+        <div class="step"><div><h3>동행복권 계정 넣기</h3><p>내 저장소의 <b>비밀 보관함</b>에 동행복권 아이디와 비밀번호를 <b>한 칸씩, 두 번</b> 넣습니다.</p>
+          ${ghFinder()}
+          <div class="actions"><a class="action compact" data-gh="secret" href="${ghLink("secret")}" target="_blank" rel="noopener">비밀 보관함 열기 →</a></div>
+          <p class="help mt">버튼이 안 되면: 내 저장소 위쪽 <code>Settings</code> → 왼쪽 <code>Secrets and variables</code> → <code>Actions</code> → 초록 <code>New repository secret</code></p>
+          <div class="gh-pair">
+            ${secretMock("첫 번째", "DH_USER_ID", "내 동행복권 아이디", "예) lucky1234")}
+            ${secretMock("두 번째", "DH_PASSWORD", "내 동행복권 비밀번호", "예) ●●●●●●●●")}
+          </div>
+          <p class="help">Name 칸에는 위 영어 이름을 <b>글자 그대로</b> 넣고(복사해서 붙여 넣으세요), Secret 칸에는 내 아이디·비밀번호를 넣은 뒤 <b>Add secret</b>. 다시 <b>New repository secret</b>을 눌러 두 번째도 넣으면 끝입니다.</p>
           <div class="lock-note"><b>🔒 넣는 순간 암호화됩니다</b><ul><li>GitHub가 비밀값을 암호화해 금고에 보관합니다. 저장한 뒤에는 <b>나도 다시 볼 수 없고</b> 바꾸거나 지울 수만 있습니다.</li><li>자동 구매가 돌 때만 잠깐 꺼내 쓰고, 실행 기록에는 <code>***</code>로 가려집니다.</li><li>메가허가를 포함해 <b>누구의 서버에도 전달되지 않습니다.</b> 내 GitHub 계정만 지키면 됩니다.</li></ul></div></div></div>
         <div class="step"><div><h3>예치금 충전</h3><p>인터넷 복권은 동행복권 사이트에 미리 넣어 둔 <b>예치금</b>으로만 삽니다. 카드나 계좌에서 바로 빠져나가지 않습니다.</p>${depositNote()}<div class="actions mt">${ext("https://www.dhlottery.co.kr", "동행복권에서 충전하기 →", "action compact")}</div></div></div>
-        <div class="step"><div><h3>시험 실행</h3><p>내 저장소 <code>Actions → 메가로또·메가연금 → Run workflow</code>에서 <code>update</code>를 한 번, 이어서 <code>buy</code>를 한 번 누르세요. 처음엔 <b>시험 실행</b>이라 로그인·잔액·번호까지만 확인하고 사지 않습니다. 초록색 체크가 나오면 준비 끝입니다.</p></div></div>
+        <div class="step"><div><h3>시험 실행</h3><p>계정이 잘 들어갔는지 <b>한 번만</b> 돌려 봅니다. 처음엔 <b>시험 모드</b>라 로그인·잔액·번호까지만 확인하고 <b>실제로 사지는 않습니다.</b></p>
+          <div class="actions"><a class="action compact" data-gh="actions" href="${ghLink("actions")}" target="_blank" rel="noopener">실행 화면 열기 →</a></div>
+          <ol class="gh-run">
+            <li>오른쪽의 <span class="gh-btn ghost">Run workflow ▾</span> 를 누릅니다.</li>
+            <li>'할 일' 칸을 <span class="gh-sel">update</span> → <span class="gh-sel on">buy</span> 로 바꿉니다.</li>
+            <li>초록색 <span class="gh-btn">Run workflow</span> 를 누르고 1~2분 기다립니다.</li>
+            <li>목록에 <span class="gh-ok">✓</span> 초록 체크가 뜨면 준비 끝! <span class="gh-bad">✕</span> 빨간 표시면 아이디·비밀번호를 다시 확인해 주세요.</li>
+          </ol>
+          <p class="help">버튼이 안 되면: 내 저장소 위쪽 <code>Actions</code> → 왼쪽 <code>메가로또·메가연금</code></p></div></div>
         <div class="step"><div><h3>이 화면에 연결</h3><p>설정 화면에서 <b>GitHub 열쇠 만들기</b>를 누르고, 만든 열쇠를 붙여 넣으면 끝입니다. 내 메가로또 저장소는 화면이 알아서 찾습니다.</p><div class="actions"><button class="action compact" data-tab="settings">설정에서 연결하기 →</button></div></div></div></div>
         <div class="step"><div><h3>실제 구매 켜기</h3><p>설정에서 번호 방식을 고르고 <b>실제 구매</b>를 켠 뒤 저장하면, 다음 월요일 오전 9시 30분부터 매주 알아서 삽니다.</p></div></div>
       </div>
@@ -1002,6 +1044,12 @@ function goTab(tab) {
   window.scrollTo(0, 0);
 }
 
+document.addEventListener("input", (e) => {
+  if (e.target.id !== "ghUser" && e.target.id !== "ghRepoName") return;
+  saveJson("megalotto.ghRepo", { user: $("#ghUser")?.value.trim() ?? "", repo: $("#ghRepoName")?.value.trim() ?? "" });
+  document.querySelectorAll("[data-gh]").forEach((a) => (a.href = ghLink(a.dataset.gh)));
+});
+
 document.addEventListener("click", async (e) => {
   const t = e.target.closest("button, a");
   if (!t || t.closest("dialog")) return;
@@ -1011,6 +1059,7 @@ document.addEventListener("click", async (e) => {
     else if (ds.run) await runTask(ds.run);
     else if (ds.share) await sharePurchase(ds.share);
     else if (ds.wall) openWallDialog(ds.wall);
+    else if (ds.copy) await navigator.clipboard.writeText(ds.copy).then(() => toast(`${ds.copy} 복사했어요`), () => toast("복사가 안 되면 직접 적어 주세요"));
     else if (ds.dseg) (state.drawSeg = ds.dseg), render();
     else if (ds.aseg) (state.anaSeg = ds.aseg), render();
     else if (ds.lr) (state.lottoRound = Math.max(1, Math.min(state.lotto.at(-1).round, state.lottoRound + Number(ds.lr)))), render();
