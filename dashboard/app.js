@@ -670,7 +670,7 @@ function renderSettings() {
   const connectCard = state.conn ? `<div class="card">
         <h3>내 메가로또 <span class="chip ok">연결됨</span></h3>
         <p style="margin:-6px 0 14px"><b>${esc(c.owner)}/${esc(c.repo)}</b> 저장소와 연결돼 있어요.</p>
-        <div class="actions">${ext(`https://github.com/${esc(c.owner)}/${esc(c.repo)}/settings/secrets/actions`, "동행복권 계정 넣기·바꾸기", "action compact secondary")}${ext(`https://github.com/${esc(c.owner)}/${esc(c.repo)}/actions`, "실행 기록 보기", "action compact secondary")}<button class="action compact danger" id="disconnect">이 브라우저에서 연결 끊기</button></div>
+        <div class="actions"><button class="action compact" data-run="buy">이번 주 것 지금 사기</button>${ext(`https://github.com/${esc(c.owner)}/${esc(c.repo)}/settings/secrets/actions`, "동행복권 계정 넣기·바꾸기", "action compact secondary")}${ext(`https://github.com/${esc(c.owner)}/${esc(c.repo)}/actions`, "실행 기록 보기", "action compact secondary")}<button class="action compact danger" id="disconnect">이 브라우저에서 연결 끊기</button></div>
       </div>` : `<div class="card">
         <h3>내 메가로또 연결하기 <span class="chip">지금은 체험 화면</span></h3>
         <p class="help" style="margin-top:-6px">GitHub 열쇠를 하나 만들어 붙여 넣으면, 내 메가로또를 찾아 이 화면과 연결합니다. 열쇠는 이 브라우저에만 저장됩니다.</p>
@@ -731,6 +731,7 @@ function renderSettings() {
 
 function ghRepo() {
   const v = loadJson("megalotto.ghRepo") ?? {};
+  if (!v.user && state.conn) return { user: state.conn.owner, repo: state.conn.repo };
   return { user: v.user ?? "", repo: v.repo || "my-megalotto" };
 }
 
@@ -741,9 +742,14 @@ function ghLink(kind) {
   return kind === "secret" ? `${base}/settings/secrets/actions/new` : `${base}/actions/workflows/megalotto.yml`;
 }
 
+function ghAddr(kind) {
+  const { user, repo } = ghRepo();
+  return `github.com/${user || "내아이디"}/${repo}${kind === "secret" ? "/settings/secrets/actions" : "/actions"}`;
+}
+
 function ghFinder() {
   const { user, repo } = ghRepo();
-  return `<div class="gh-finder"><label>내 GitHub 아이디<input id="ghUser" value="${esc(user)}" placeholder="예) hong-gildong" autocomplete="off" /></label><label>저장소 이름<input id="ghRepoName" value="${esc(repo)}" autocomplete="off" /></label><p class="help">넣어 두면 아래 버튼이 내 저장소로 바로 갑니다. (이 브라우저에만 저장)</p></div>`;
+  return `<div class="gh-finder"><label>내 GitHub 아이디<input id="ghUser" value="${esc(user)}" placeholder="예) hong-gildong" autocomplete="off" /></label><label>저장소 이름<input id="ghRepoName" value="${esc(repo)}" autocomplete="off" /></label><p class="help">넣어 두면 아래 <b>열기</b> 버튼이 내 저장소의 그 화면으로 바로 갑니다. 메뉴를 찾을 필요가 없어요. (이 브라우저에만 저장)</p></div>`;
 }
 
 function secretMock(order, name, what, sample) {
@@ -762,11 +768,13 @@ function renderStart() {
       ${termsNote()}
       <div class="steps">
         <div class="step"><div><h3>GitHub 가입</h3><p>프로그램이 돌아갈 무료 공간입니다. 이미 있으면 건너뛰세요.</p><div class="actions">${ext("https://github.com/signup", "GitHub 가입하기 →", "action compact secondary")}</div></div></div>
-        <div class="step"><div><h3>메가로또를 내 계정으로 복사</h3><p>버튼을 누르면 이름(my-megalotto)과 <b>비공개(Private)</b>가 이미 골라져 있어요. 초록색 <b>Create repository</b>만 누르면 됩니다. 비공개라 구매 기록이 남에게 보이지 않습니다.</p><div class="actions">${ext(COPY_URL, "내 저장소로 복사하기 →", "action compact")}</div></div></div>
-        <div class="step"><div><h3>동행복권 계정 넣기</h3><p>내 저장소의 <b>비밀 보관함</b>에 동행복권 아이디와 비밀번호를 <b>한 칸씩, 두 번</b> 넣습니다.</p>
+        <div class="step"><div><h3>메가로또를 내 계정으로 복사</h3><p>버튼을 누르면 이름(my-megalotto)과 <b>비공개(Private)</b>가 이미 골라져 있어요. 초록색 <b>Create repository</b>만 누르면 됩니다. 비공개라 구매 기록이 남에게 보이지 않습니다.</p><div class="actions">${ext(COPY_URL, "내 저장소로 복사하기 →", "action compact")}</div>
+          <p class="mt"><b>복사가 끝나면 내 GitHub 아이디를 여기에 적어 두세요.</b> 다음 단계 버튼들이 내 저장소로 바로 데려갑니다.</p>
           ${ghFinder()}
+          <p class="help">💡 GitHub 화면은 <b>휴대폰보다 PC가 훨씬 쉽습니다.</b> 휴대폰에선 위쪽 메뉴가 옆으로 숨어 있어요.</p></div></div>
+        <div class="step"><div><h3>동행복권 계정 넣기</h3><p>내 저장소의 <b>비밀 보관함</b>에 동행복권 아이디와 비밀번호를 <b>한 칸씩, 두 번</b> 넣습니다.</p>
           <div class="actions"><a class="action compact" data-gh="secret" href="${ghLink("secret")}" target="_blank" rel="noopener">비밀 보관함 열기 →</a></div>
-          <p class="help mt">버튼이 안 되면: 내 저장소 위쪽 <code>Settings</code> → 왼쪽 <code>Secrets and variables</code> → <code>Actions</code> → 초록 <code>New repository secret</code></p>
+          <p class="help mt">주소로 가도 됩니다: <code data-gh-text="secret">${ghAddr("secret")}</code><br />메뉴로 가려면: 내 저장소 위쪽 <code>Settings</code> → 왼쪽 <code>Secrets and variables</code> → <code>Actions</code> → 초록 <code>New repository secret</code></p>
           <div class="gh-pair">
             ${secretMock("첫 번째", "DH_USER_ID", "내 동행복권 아이디", "예) lucky1234")}
             ${secretMock("두 번째", "DH_PASSWORD", "내 동행복권 비밀번호", "예) ●●●●●●●●")}
@@ -782,9 +790,9 @@ function renderStart() {
             <li>초록색 <span class="gh-btn">Run workflow</span> 를 누르고 1~2분 기다립니다.</li>
             <li>목록에 <span class="gh-ok">✓</span> 초록 체크가 뜨면 준비 끝! <span class="gh-bad">✕</span> 빨간 표시면 아이디·비밀번호를 다시 확인해 주세요.</li>
           </ol>
-          <p class="help">버튼이 안 되면: 내 저장소 위쪽 <code>Actions</code> → 왼쪽 <code>메가로또·메가연금</code></p></div></div>
+          <p class="help">주소로 가도 됩니다: <code data-gh-text="actions">${ghAddr("actions")}</code> → 왼쪽 <code>메가로또·메가연금</code><br />메뉴로 가려면: 내 저장소 맨 위 메뉴 줄 <code>Code · Issues · Pull requests · <b>Actions</b></code> 에서 Actions</p></div></div>
         <div class="step"><div><h3>이 화면에 연결</h3><p>설정 화면에서 <b>GitHub 열쇠 만들기</b>를 누르고, 만든 열쇠를 붙여 넣으면 끝입니다. 내 메가로또 저장소는 화면이 알아서 찾습니다.</p><div class="actions"><button class="action compact" data-tab="settings">설정에서 연결하기 →</button></div></div></div></div>
-        <div class="step"><div><h3>실제 구매 켜기</h3><p>설정에서 번호 방식을 고르고 <b>실제 구매</b>를 켠 뒤 저장하면 매주 월요일 오전 9시 30분에 알아서 삽니다. 이번 주 것을 아직 안 샀다면 저장하자마자 바로 사도록 고를 수 있어요.</p>${stopGuide()}</div></div>
+        <div class="step"><div><h3>실제 구매 켜기</h3><p>설정에서 번호 방식을 고르고 <b>자동으로 사기</b>를 고른 뒤 <b>설정 저장</b>을 누르면 매주 월요일 오전 9시 30분에 알아서 삽니다. 이번 주 것을 아직 안 샀다면 저장할 때 <b>"지금 살까요?"</b>를 물어봅니다. 나중에 사고 싶으면 첫 화면 <b>[지금 구매 실행]</b>을 누르세요.</p>${stopGuide()}</div></div>
       </div>
 
     </div>
@@ -1076,7 +1084,7 @@ function confirmReal() {
     const dlg = $("#dialog");
     dlg.innerHTML = `<h3 style="margin:0 0 8px">실제 구매를 켤까요?</h3><p style="margin:0 0 8px">매주 월요일 오전 9시 30분에 동행복권 예치금으로 실제로 삽니다.<br />로또 최대 5,000원 + 연금 5,000원 = <b>한 주 최대 10,000원</b></p><p class="help">예치금은 동행복권에서 미리 충전해 두세요. 산 복권은 취소할 수 없습니다.</p>${state.conn && canBuyThisWeekNow() ? `<label class="buy-now"><input type="checkbox" id="buyNow" checked /><span><b>이번 주 것은 저장하면 바로 사기</b><small>월요일까지 기다리지 않고, 아직 안 산 이번 주 복권을 지금 삽니다.</small></span></label>` : ""}<div class="actions mt"><button class="action compact" id="yes">켜기</button><button class="action compact secondary" id="no">취소</button></div>`;
     dlg.onclick = (e) => {
-      if (e.target.id === "yes") ((state.buyNow = !!dlg.querySelector("#buyNow")?.checked), dlg.close(), resolve(true));
+      if (e.target.id === "yes") ((state.buyNow = !!dlg.querySelector("#buyNow")?.checked), (state.buyNowDecided = !!dlg.querySelector("#buyNow")), dlg.close(), resolve(true));
       if (e.target.id === "no") (dlg.close(), resolve(false));
     };
     dlg.showModal();
@@ -1096,12 +1104,20 @@ document.addEventListener("input", (e) => {
   if (e.target.id !== "ghUser" && e.target.id !== "ghRepoName") return;
   saveJson("megalotto.ghRepo", { user: $("#ghUser")?.value.trim() ?? "", repo: $("#ghRepoName")?.value.trim() ?? "" });
   document.querySelectorAll("[data-gh]").forEach((a) => (a.href = ghLink(a.dataset.gh)));
+  document.querySelectorAll("[data-gh-text]").forEach((el) => (el.textContent = ghAddr(el.dataset.ghText)));
 });
 
 document.addEventListener("click", async (e) => {
   const t = e.target.closest("button, a");
   if (!t || t.closest("dialog")) return;
   const ds = t.dataset;
+  if (ds.gh && !ghRepo().user) {
+    e.preventDefault();
+    toast("먼저 2번 단계에 내 GitHub 아이디를 적어 주세요");
+    $("#ghUser")?.scrollIntoView({ block: "center" });
+    $("#ghUser")?.focus();
+    return;
+  }
   try {
     if (ds.tab) (e.preventDefault(), goTab(ds.tab));
     else if (ds.run) {
@@ -1141,10 +1157,15 @@ document.addEventListener("click", async (e) => {
       await saveSettings(next);
       state.draft = structuredClone(next);
       render();
-      if (state.conn && state.buyNow && next.autoBuy && !next.dryRun) {
+      const decided = state.buyNowDecided;
+      state.buyNowDecided = false;
+      if (state.conn && next.autoBuy && !next.dryRun) {
+        const go = state.buyNow || (!decided && canBuyThisWeekNow() && (await confirmBuyNow()));
         state.buyNow = false;
-        await runTask("buy");
-        toast("이번 주 복권을 지금 사는 중이에요. 2~3분 뒤 구매현황에서 확인하세요");
+        if (go) {
+          await runTask("buy");
+          toast("이번 주 복권을 지금 사는 중이에요. 2~3분 뒤 구매현황에서 확인하세요");
+        }
       }
     } else if (t.id === "resetDraft") (state.draft = structuredClone(state.settings)), render();
     else if (t.id === "connect") {
@@ -1187,6 +1208,7 @@ document.addEventListener("change", async (e) => {
     render();
   } else if (t.name === "runmode") {
     state.buyNow = false;
+    state.buyNowDecided = false;
     if (t.value === "buy" && !(await confirmReal())) return render();
     d.autoBuy = t.value !== "stop";
     d.dryRun = t.value !== "buy";
