@@ -501,3 +501,9 @@ dialog::backdrop { background: rgba(23, 32, 32, 0.55); }
 .buy-now input { margin-top: 4px; width: 18px; height: 18px; flex: none; }
 .buy-now span { display: flex; flex-direction: column; gap: 2px; }
 .buy-now small { color: var(--sub); font-size: 13px; }
+
+.stop-guide { background: #fff4f2; border: 1px solid #f3c2bb; border-left: 5px solid #d9483b; border-radius: 4px; padding: 14px 16px; margin: 14px 0; font-size: 14.5px; line-height: 1.6; }
+.stop-guide > b { font-size: 16px; color: #b3261e; }
+.stop-guide ol { margin: 8px 0 6px; padding-left: 20px; display: grid; gap: 6px; }
+.stop-guide code { background: #fff; padding: 1px 5px; border-radius: 3px; font-size: 13px; }
+.stop-guide small { color: var(--sub); }

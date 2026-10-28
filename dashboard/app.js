@@ -716,6 +716,7 @@ function renderSettings() {
           <label><input type="radio" name="runmode" value="test" ${d.autoBuy && d.dryRun ? "checked" : ""} /><span><b>시험만 하기 (사지 않음)</b><small>로그인·예치금·번호까지만 확인합니다. 처음 연결했을 때 한 번 해 보세요.</small></span></label>
           <label><input type="radio" name="runmode" value="stop" ${d.autoBuy ? "" : "checked"} /><span><b>잠시 멈추기</b><small>아무것도 사지 않습니다. 당첨번호 확인은 계속합니다.</small></span></label>
         </div>
+        ${stopGuide()}
         ${depositNote()}
       </div>
 
@@ -781,7 +782,7 @@ function renderStart() {
           </ol>
           <p class="help">버튼이 안 되면: 내 저장소 위쪽 <code>Actions</code> → 왼쪽 <code>메가로또·메가연금</code></p></div></div>
         <div class="step"><div><h3>이 화면에 연결</h3><p>설정 화면에서 <b>GitHub 열쇠 만들기</b>를 누르고, 만든 열쇠를 붙여 넣으면 끝입니다. 내 메가로또 저장소는 화면이 알아서 찾습니다.</p><div class="actions"><button class="action compact" data-tab="settings">설정에서 연결하기 →</button></div></div></div></div>
-        <div class="step"><div><h3>실제 구매 켜기</h3><p>설정에서 번호 방식을 고르고 <b>실제 구매</b>를 켠 뒤 저장하면 매주 월요일 오전 9시 30분에 알아서 삽니다. 이번 주 것을 아직 안 샀다면 저장하자마자 바로 사도록 고를 수 있어요.</p></div></div>
+        <div class="step"><div><h3>실제 구매 켜기</h3><p>설정에서 번호 방식을 고르고 <b>실제 구매</b>를 켠 뒤 저장하면 매주 월요일 오전 9시 30분에 알아서 삽니다. 이번 주 것을 아직 안 샀다면 저장하자마자 바로 사도록 고를 수 있어요.</p>${stopGuide()}</div></div>
       </div>
 
     </div>
@@ -794,6 +795,7 @@ function renderStart() {
           <details><summary>나중에 유료가 되나요?</summary><p>될 수 없는 구조입니다. 메가로또는 여러분 GitHub에 복사돼 그 안에서 돌아가고, 저희 서버를 거치지 않습니다. 그래서 저희가 돈을 받을 방법도, 비밀번호를 볼 방법도 없습니다. 소스가 전부 공개(MIT)라서 저희가 그만두더라도 지금 쓰시는 건 그대로 돌아갑니다.</p></details>
           <details><summary>왜 무료로 푸나요?</summary><p>솔직히 말씀드리면 회사를 알리려고요. 충주에서 AI 회사((주)메가허가 AI)를 하는 대표가 매주 직접 쓰려고 만든 프로그램입니다. 저희가 어떤 자동화를 만드는지 보여 드리는 게 광고보다 낫다고 생각해서 소스 코드까지 모두 공개했습니다.</p></details>
           <details><summary>비밀번호는 안전한가요?</summary><p>네. <b>GitHub 계정만 안전하게 지키면 됩니다.</b> 동행복권 아이디·비밀번호는 내 GitHub 저장소의 암호화된 비밀값에만 들어가고, 메가허가를 포함해 누구의 서버에도 가지 않습니다. 화면 연결용 GitHub 열쇠도 내 브라우저에만 저장됩니다. GitHub 2단계 인증을 켜 두시길 권합니다.</p></details>
+          <details><summary>그만 사고 싶으면 어떻게 하나요?</summary>${stopGuide()}</details>
           <details><summary>컴퓨터를 켜 둬야 하나요?</summary><p>아니요. GitHub 서버가 정해진 시간에 실행합니다. 휴대폰으로 이 화면을 열어 확인만 하면 됩니다.</p></details>
           <details><summary>분석번호를 사면 더 잘 맞나요?</summary><p>아니요. 로또·연금복권 추첨은 매 회차가 서로 영향을 주지 않는 <b>독립시행</b>이라, 어떤 번호든 당첨 확률은 똑같습니다(로또 1등 814만 5,060분의 1). 분석번호는 지난 당첨 흐름을 참고해 번호 고르는 수고를 덜어 주는 방법일 뿐입니다. 내 번호·자동과 섞어 쓸 수 있어요.</p></details><details><summary>잘못 사지거나 손해가 나면 누가 책임지나요?</summary><p>메가로또는 무료로 공개한 비공식 프로그램이라, (주)메가허가에이아이는 구매·당첨 결과, 금전 손실, 계정 문제, 동행복권 사이트가 바뀌어 생긴 오류에 대해 책임지지 않습니다. 처음엔 시험 실행으로 확인하고, 한 주 최대 1만 원 안에서만 쓰세요. 산 복권은 취소할 수 없습니다.</p></details>
           <details><summary>한 주에 얼마까지 사나요?</summary><p>로또 최대 5게임(5,000원) + 연금복권 5장(5,000원), 최대 1만 원입니다. 동행복권 인터넷 구매 한도(로또는 회차당 5천 원) 안에서만 삽니다.</p></details>
@@ -1032,6 +1034,33 @@ function canBuyThisWeekNow() {
   return weekStatus("lotto", currentLottoRound().round) !== "구매 완료";
 }
 
+/** 그만 사고 싶을 때 안내 (설정·시작하기·자주 묻는 질문에 같이 쓴다) */
+function stopGuide() {
+  return `<div class="stop-guide"><b>✋ 그만 사고 싶으면</b>
+    <ol>
+      <li><b>가장 쉬움:</b> 이 화면 <b>번호·설정</b>에서 <b>잠시 멈추기</b>를 고르고 <b>저장</b>. 다음 월요일부터 아무것도 사지 않고, 당첨번호 확인은 계속합니다. 다시 사려면 <b>자동으로 사기</b>로 바꾸면 됩니다.</li>
+      <li><b>GitHub에서 통째로 끄기:</b> 내 저장소 <code>Actions</code> → 왼쪽 <code>메가로또·메가연금</code> → 오른쪽 위 <code>⋯</code> → <code>Disable workflow</code>. 다시 켜려면 같은 자리에서 <code>Enable workflow</code>.</li>
+      <li><b>완전히 그만두기:</b> 내 저장소 <code>Settings</code> 맨 아래 <code>Delete this repository</code>. 넣어 둔 아이디·비밀번호도 같이 지워집니다. 남은 예치금은 동행복권에서 출금하세요.</li>
+    </ol>
+    <small>이미 산 복권은 어떤 방법으로도 취소할 수 없습니다(동행복권 규정).</small></div>`;
+}
+
+function confirmBuyNow() {
+  return new Promise((resolve) => {
+    const s = state.settings ?? {};
+    const real = s.autoBuy !== false && !s.dryRun;
+    const dlg = $("#dialog");
+    dlg.innerHTML = real
+      ? `<h3 style="margin:0 0 8px">지금 이번 주 복권을 살까요?</h3><p style="margin:0 0 8px">월요일까지 기다리지 않고 <b>지금 바로</b> 동행복권 예치금으로 삽니다.<br />로또 최대 5,000원 + 연금 5,000원 = <b>최대 10,000원</b></p><p class="help">이번 주 것을 이미 샀다면 다시 사지 않습니다. 산 복권은 취소할 수 없습니다.</p><div class="actions mt"><button class="action compact" id="yes">지금 사기</button><button class="action compact secondary" id="no">취소</button></div>`
+      : `<h3 style="margin:0 0 8px">시험 실행을 할까요?</h3><p style="margin:0 0 8px">지금은 <b>${s.autoBuy === false ? "잠시 멈춤" : "시험만 하기"}</b> 상태라 실제로 사지 않고, 로그인·예치금·번호까지만 확인합니다.</p><div class="actions mt"><button class="action compact" id="yes">시험 실행</button><button class="action compact secondary" id="no">취소</button></div>`;
+    dlg.onclick = (e) => {
+      if (e.target.id === "yes") (dlg.close(), resolve(true));
+      if (e.target.id === "no") (dlg.close(), resolve(false));
+    };
+    dlg.showModal();
+  });
+}
+
 function confirmReal() {
   return new Promise((resolve) => {
     const dlg = $("#dialog");
@@ -1065,7 +1094,10 @@ document.addEventListener("click", async (e) => {
   const ds = t.dataset;
   try {
     if (ds.tab) (e.preventDefault(), goTab(ds.tab));
-    else if (ds.run) await runTask(ds.run);
+    else if (ds.run) {
+      if (ds.run === "buy" && state.conn && !(await confirmBuyNow())) return;
+      await runTask(ds.run);
+    }
     else if (ds.share) await sharePurchase(ds.share);
     else if (ds.wall) openWallDialog(ds.wall);
     else if (ds.copy) await navigator.clipboard.writeText(ds.copy).then(() => toast(`${ds.copy} 복사했어요`), () => toast("복사가 안 되면 직접 적어 주세요"));
