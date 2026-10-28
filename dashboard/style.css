@@ -514,3 +514,8 @@ dialog::backdrop { background: rgba(23, 32, 32, 0.55); }
 details .terms-note { margin: 10px 0 4px; }
 .terms-mini { margin-top: 10px; font-size: 13.5px; color: #8a5a00; }
 .terms-mini a { color: inherit; font-weight: 800; text-decoration: underline; }
+
+.howto .card h3 { font-size: 17px; margin: 0 0 6px; }
+.howto .card p { margin: 0; line-height: 1.65; }
+.howto-jump { margin: 0 0 12px; font-size: 14.5px; font-weight: 700; }
+.howto-jump a { color: inherit; text-decoration: underline; }

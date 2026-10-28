@@ -371,7 +371,7 @@ function renderHome() {
     ? `<span class="eyebrow">내 메가로또 · ${esc(state.conn.owner)}</span>
        <h1>한 주 ${won(weekly)},<br />${nextBuyText()}에<br />알아서 삽니다</h1>
        <p class="lead">로또 ${s.lotto.enabled ? `${s.lotto.slots.length}게임` : "끔"} · 연금복권 ${s.pension.enabled ? "5장" : "끔"} · ${s.dryRun ? "지금은 시험 실행이라 실제로 사지 않아요" : "실제 구매가 켜져 있어요"}</p>
-       <div class="actions"><button class="action" data-run="buy">지금 구매 실행 <span class="arrow">→</span></button><button class="action secondary" data-tab="settings">번호 바꾸기</button></div>`
+       <div class="actions"><button class="action" data-run="buy">지금 구매 실행 <span class="arrow">→</span></button><button class="action secondary" data-tab="settings">번호 바꾸기</button><button class="action secondary" data-tab="start" data-scroll="howto">사용법</button></div>`
     : `<span class="eyebrow">완전 무료 · 결제창 없음 · 소스 전부 공개</span>
        <h1>매주 복권 사기,<br />이제 잊어버리세요</h1>
        <p class="lead">매주 사러 가기 귀찮은 분을 위해 만들었습니다. 월요일 오전 9시 30분, 내 동행복권 계정으로 로또 5게임과 연금복권 5장을 대신 삽니다. 번호는 <b>자동</b>으로 두거나 <b>내 번호</b>를 정해 두면 끝. 컴퓨터를 꺼 둬도 됩니다.</p>
@@ -765,6 +765,7 @@ function secretMock(order, name, what, sample) {
 function renderStart() {
   return `${pageTitle("무료로 시작하기", "10분이면 내 메가로또가 생깁니다", "필요한 것: GitHub 계정(무료), 동행복권 계정과 예치금. 프로그램 설치는 없습니다.")}
     <div class="container page-body">
+      <p class="howto-jump">이미 설정을 끝내셨나요? <a href="#howto" data-scroll="howto">사용법 바로 보기 ↓</a></p>
       ${termsNote()}
       <div class="steps">
         <div class="step"><div><h3>GitHub 가입</h3><p>프로그램이 돌아갈 무료 공간입니다. 이미 있으면 건너뛰세요.</p><div class="actions">${ext("https://github.com/signup", "GitHub 가입하기 →", "action compact secondary")}</div></div></div>
@@ -795,6 +796,21 @@ function renderStart() {
         <div class="step"><div><h3>실제 구매 켜기</h3><p>설정에서 번호 방식을 고르고 <b>자동으로 사기</b>를 고른 뒤 <b>설정 저장</b>을 누르면 매주 월요일 오전 9시 30분에 알아서 삽니다. 이번 주 것을 아직 안 샀다면 저장할 때 <b>"지금 살까요?"</b>를 물어봅니다. 나중에 사고 싶으면 첫 화면 <b>[지금 구매 실행]</b>을 누르세요.</p>${stopGuide()}</div></div>
       </div>
 
+    </div>
+    <div class="container" id="howto">
+      <div class="band" style="padding-bottom:0">
+        ${secHead("사용법", "설정이 끝나면, 이렇게 씁니다")}
+        <div class="grid g2 howto">
+          <div class="card"><h3>1. 그냥 두면 됩니다</h3><p>매주 <b>월요일 오전 9시 30분</b>에 알아서 삽니다. 로또 당첨 확인은 <b>일요일 아침</b>, 연금복권은 <b>목요일 밤</b>에 알아서 합니다.</p></div>
+          <div class="card"><h3>2. 이번 주 번호 보기</h3><p>첫 화면 <b>'이번 주에 살 번호'</b>에 이번 주에 살 번호가 미리 나와 있습니다.</p></div>
+          <div class="card"><h3>3. 산 것·당첨 결과 보기</h3><p>위 메뉴 <b>구매현황</b>에서 산 번호와 등수를 봅니다. 당첨금은 동행복권 사이트 마이페이지에서 확인하고 받으세요.</p></div>
+          <div class="card"><h3>4. 번호 바꾸기</h3><p><b>번호·설정</b>에서 게임마다 분석번호·저장번호·무작위·자동을 고르고 맨 아래 <b>설정 저장</b>. 다음 구매부터 바뀝니다.</p></div>
+          <div class="card"><h3>5. 이번 주 것 지금 사기</h3><p>월요일까지 기다리기 싫으면 첫 화면 <b>[지금 구매 실행]</b>. 이미 산 주에는 다시 사지 않습니다.</p></div>
+          <div class="card"><h3>6. 예치금 채워 두기</h3><p>예치금이 모자라면 <b>사지 않습니다.</b> 한 주 최대 1만 원이라 한 달에 4~5만 원 넣어 두면 넉넉합니다.</p></div>
+          <div class="card"><h3>7. 다른 폰·PC에서 보기</h3><p>연결 정보는 그 브라우저에만 저장됩니다. 다른 기기에서는 <b>번호·설정 → 내 저장소 연결</b>에서 GitHub 열쇠를 한 번 더 붙여 넣으세요.</p></div>
+          <div class="card"><h3>8. 잠시 쉬기</h3><p><b>번호·설정</b>에서 <b>잠시 멈추기</b> → 설정 저장. 사지는 않고 당첨 확인만 계속합니다.</p></div>
+        </div>
+      </div>
     </div>
     ${safetyBand()}
     <div class="container">
@@ -1119,7 +1135,8 @@ document.addEventListener("click", async (e) => {
     return;
   }
   try {
-    if (ds.tab) (e.preventDefault(), goTab(ds.tab));
+    if (ds.tab) (e.preventDefault(), goTab(ds.tab), ds.scroll && $(`#${ds.scroll}`)?.scrollIntoView());
+    else if (ds.scroll) (e.preventDefault(), $(`#${ds.scroll}`)?.scrollIntoView({ behavior: "smooth" }));
     else if (ds.run) {
       if (ds.run === "buy" && state.conn && !(await confirmBuyNow())) return;
       await runTask(ds.run);
