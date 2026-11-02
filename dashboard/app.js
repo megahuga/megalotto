@@ -192,12 +192,88 @@ async function runTask(task) {
     toast("내 저장소를 연결하면 실행할 수 있어요");
     return;
   }
+  const startedAt = Date.now();
   await gh(`${repoPath()}/actions/workflows/${WORKFLOW}/dispatches`, {
     method: "POST",
     body: { ref: state.repo?.default_branch ?? "main", inputs: { task } }
   });
-  toast({ buy: "구매를 시작했어요. 2~3분 뒤 새로고침하세요", update: "당첨번호 업데이트를 시작했어요", check: "잔액 확인을 시작했어요" }[task]);
-  setTimeout(loadRuns, 4000);
+  await watchRun(task, startedAt);
+}
+
+const TASK_LABEL = { buy: "이번 주 복권 사기", update: "당첨번호 업데이트", check: "잔액 확인", diagnose: "접속 점검" };
+const wait = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
+/** 실행을 누른 뒤 끝날 때까지 창으로 단계를 보여 주고, 끝나면 결과를 알려 준다 */
+async function watchRun(task, startedAt) {
+  const dlg = $("#dialog");
+  let closed = false;
+  const steps = ["요청 보냄", "GitHub에서 준비", task === "buy" ? "동행복권에서 사는 중" : "실행 중", "끝"];
+  const show = (step, body, buttons) => {
+    dlg.innerHTML = `<h3 style="margin:0 0 12px">${TASK_LABEL[task] ?? task}</h3>
+      <ol class="run-steps">${steps.map((t, i) => `<li class="${i < step ? "done" : i === step ? "now" : ""}">${t}</li>`).join("")}</ol>
+      <p style="margin:12px 0 0">${body}</p>
+      <div class="actions mt">${buttons ?? `<button class="action compact secondary" id="runBg">닫기 (뒤에서 계속 진행돼요)</button>`}</div>`;
+  };
+  dlg.onclick = (e) => {
+    const id = e.target.id;
+    if (id === "runBg" || id === "runClose") (closed = true), dlg.close();
+    if (id === "runHistory") (closed = true), dlg.close(), goTab("history");
+  };
+  show(1, "보통 2~3분 걸려요. 이 창을 닫아도 계속 진행됩니다.");
+  if (!dlg.open) dlg.showModal();
+  const close = `<button class="action compact secondary" id="runClose">닫기</button>`;
+  while (!closed && Date.now() - startedAt < 8 * 60000) {
+    await wait(5000);
+    if (closed) return;
+    let run = null;
+    try {
+      const data = await gh(`${repoPath()}/actions/workflows/${WORKFLOW}/runs?event=workflow_dispatch&per_page=5`);
+      run = (data?.workflow_runs ?? []).find((r) => new Date(r.created_at).getTime() >= startedAt - 60000) ?? null;
+    } catch (e) {
+      console.warn(e);
+    }
+    if (!run) continue;
+    if (run.status !== "completed") {
+      show(run.status === "in_progress" ? 2 : 1, run.status === "in_progress" ? (task === "buy" ? "동행복권에 로그인해서 처리하고 있어요…" : "처리하고 있어요…") : "GitHub에서 실행을 준비하고 있어요…");
+      continue;
+    }
+    await loadAll();
+    if (closed) return;
+    if (run.conclusion !== "success") {
+      return show(4, `<b>실패했어요.</b> ${state.status.lastError ? esc(state.status.lastError) : "실행 기록에서 이유를 볼 수 있어요."}`, `${ext(esc(run.html_url), "실행 기록 보기", "action compact")}${close}`);
+    }
+    if (task !== "buy") return show(4, "<b>끝났어요.</b> 화면을 새 내용으로 바꿨어요.", close);
+    const l = weekStatus("lotto", currentLottoRound().round);
+    const pn = weekStatus("pension", currentPensionRound().round);
+    const s = state.settings;
+    const bought = (!s.lotto.enabled || l === "구매 완료") && (!s.pension.enabled || pn === "구매 완료");
+    if (bought) return show(4, `<b>이번 주 복권을 샀어요 🎉</b><br />로또 ${l} · 연금복권 ${pn}. 번호는 구매현황에서 볼 수 있어요.`, `<button class="action compact" id="runHistory">구매현황 보기</button>${close}`);
+    if (s.dryRun) return show(4, `<b>시험 성공!</b> 로그인·예치금·번호까지 확인했어요. 시험 모드라 <b>실제로 사지는 않았어요.</b>`, `<button class="action compact" id="runHistory">시험 결과 보기</button>${close}`);
+    return show(4, `<b>사지 못했어요.</b> 로또 ${l} · 연금복권 ${pn}. 예치금(지금 ${state.status.balance === undefined ? "확인 전" : won(state.status.balance)})을 확인해 주세요.`, `${ext(esc(run.html_url), "실행 기록 보기", "action compact")}${close}`);
+  }
+  if (!closed) show(3, "아직 끝나지 않았어요. GitHub가 붐비면 더 걸릴 수 있어요. 잠시 뒤 새로고침해 주세요.", close);
+}
+
+function failDialog(title, html) {
+  const dlg = $("#dialog");
+  dlg.innerHTML = `<h3 style="margin:0 0 8px">${title}</h3><p style="margin:0 0 8px">${html}</p><div class="actions mt"><button class="action compact" id="fOk">확인</button></div>`;
+  dlg.onclick = (e) => e.target.id === "fOk" && dlg.close();
+  if (!dlg.open) dlg.showModal();
+}
+
+/** 연결이 끝나면 어디와 연결됐는지, 다음에 뭘 하면 되는지 창으로 알려 준다 */
+function connectedDialog() {
+  const dlg = $("#dialog");
+  const s = state.settings;
+  const next = s.autoBuy && !s.dryRun
+    ? `<p style="margin:0 0 8px">실제 구매가 켜져 있어요. <b>매주 월요일 오전 9시 30분</b>에 알아서 삽니다.</p><div class="actions mt"><button class="action compact" id="cHome">첫 화면 보기</button></div>`
+    : `<p style="margin:0 0 8px">지금은 <b>${s.autoBuy ? "시험 모드" : "잠시 멈춤"}</b> 상태라 실제로 사지 않아요. 이제 실제 구매를 켜면 끝입니다.</p><div class="actions mt"><button class="action compact" id="cReal">실제 구매 켜기</button><button class="action compact secondary" id="cHome">나중에</button></div>`;
+  dlg.innerHTML = `<h3 style="margin:0 0 8px">연결됐어요 ✅</h3><p style="margin:0 0 8px"><b>${esc(state.conn.owner)}/${esc(state.conn.repo)}</b> 저장소와 연결했어요. 이제 이 화면에서 바꾸는 설정이 내 메가로또에 바로 저장됩니다.</p>${next}`;
+  dlg.onclick = async (e) => {
+    if (e.target.id === "cHome") dlg.close(), goTab("home");
+    if (e.target.id === "cReal") dlg.close(), goTab("home"), await turnOnRealBuy();
+  };
+  dlg.showModal();
 }
 
 async function loadRuns() {
@@ -1122,7 +1198,6 @@ async function turnOnRealBuy() {
   if (state.buyNow) {
     state.buyNow = false;
     await runTask("buy");
-    toast("실제 구매를 켰어요. 이번 주 복권을 지금 사는 중이에요. 2~3분 뒤 구매현황에서 확인하세요");
   } else toast("실제 구매를 켰어요. 다음 월요일 오전 9시 30분에 삽니다");
 }
 
@@ -1164,6 +1239,10 @@ function goTab(tab) {
   window.scrollTo(0, 0);
 }
 
+document.addEventListener("keydown", (e) => {
+  if (e.key === "Enter" && e.target.id === "cToken") (e.preventDefault(), $("#connect")?.click());
+});
+
 document.addEventListener("input", (e) => {
   if (e.target.id !== "ghUser" && e.target.id !== "ghRepoName") return;
   saveJson("megalotto.ghRepo", { user: $("#ghUser")?.value.trim() ?? "", repo: $("#ghRepoName")?.value.trim() ?? "" });
@@ -1195,7 +1274,6 @@ document.addEventListener("click", async (e) => {
           state.draft = structuredClone(next);
           render();
           await runTask("buy");
-          toast("실제 구매를 켰어요. 이번 주 복권을 지금 사는 중이에요. 2~3분 뒤 구매현황에서 확인하세요");
           return;
         }
       }
@@ -1241,7 +1319,6 @@ document.addEventListener("click", async (e) => {
         state.buyNow = false;
         if (go) {
           await runTask("buy");
-          toast("이번 주 복권을 지금 사는 중이에요. 2~3분 뒤 구매현황에서 확인하세요");
         }
       }
     } else if (t.id === "goReal") await turnOnRealBuy();
@@ -1251,20 +1328,23 @@ document.addEventListener("click", async (e) => {
       if (!token) return toast("GitHub 열쇠를 붙여 넣어 주세요");
       let owner = $("#cOwner")?.value.trim();
       let repo = $("#cRepo")?.value.trim();
+      t.disabled = true;
+      t.textContent = "내 메가로또 찾는 중…";
       if (!owner || !repo) {
-        t.disabled = true;
-        t.textContent = "내 메가로또 찾는 중…";
-        const found = await findMegalottoRepo(token).finally(() => (t.disabled = false));
+        const found = await findMegalottoRepo(token).catch((err) => (failDialog("연결하지 못했어요", esc(err.message)), ""));
         if (!found) {
+          t.disabled = false;
           t.textContent = "연결하기";
-          return toast("이 열쇠로 볼 수 있는 저장소에서 메가로또를 못 찾았어요. 열쇠를 만들 때 메가로또 저장소를 골랐는지 확인해 주세요");
+          if (found === null) failDialog("메가로또 저장소를 못 찾았어요", "이 열쇠로 볼 수 있는 저장소에 메가로또가 없어요. 열쇠를 만들 때 <b>Select repositories</b>에서 <b>내 메가로또 저장소</b>에 체크했는지 확인해 주세요. (위 그림 ①번)");
+          return;
         }
         [owner, repo] = found.split("/");
       }
       state.conn = { owner, repo, token };
       saveJson(CONN_KEY, state.conn);
       await loadAll();
-      if (state.conn) toast("연결했어요");
+      if (state.conn) connectedDialog();
+      else failDialog("연결하지 못했어요", "열쇠가 맞는지, 열쇠에 이 저장소를 골랐는지 확인해 주세요.");
     } else if (t.id === "disconnect") {
       state.conn = null;
       saveJson(CONN_KEY, null);

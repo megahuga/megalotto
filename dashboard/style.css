@@ -523,3 +523,11 @@ details .terms-note { margin: 10px 0 4px; }
 .howto-jump { margin: 0 0 12px; font-size: 14.5px; font-weight: 700; }
 .howto-jump a { color: inherit; text-decoration: underline; }
 .token-guide img { display: block; width: 100%; max-width: 640px; margin-top: 10px; border: 1px solid var(--line); border-radius: 4px; }
+.run-steps { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.run-steps li { display: flex; align-items: center; gap: 10px; color: var(--sub); }
+.run-steps li::before { content: ""; flex: none; width: 18px; height: 18px; border-radius: 50%; border: 2px solid var(--line); box-sizing: border-box; }
+.run-steps li.done { color: var(--ink); }
+.run-steps li.done::before { background: #1f8a5b; border-color: #1f8a5b; }
+.run-steps li.now { color: var(--ink); font-weight: 700; }
+.run-steps li.now::before { border-color: #1f8a5b; border-top-color: transparent; animation: runspin 0.9s linear infinite; }
+@keyframes runspin { to { transform: rotate(360deg); } }
