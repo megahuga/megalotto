@@ -169,7 +169,7 @@ async function saveSettings(settings) {
   if (!state.conn) {
     saveJson(DEMO_SETTINGS_KEY, settings);
     state.settings = settings;
-    toast("체험 화면이라 이 브라우저에만 저장했어요");
+    notConnectedDialog();
     return;
   }
   const res = await gh(`${repoPath()}/contents/config/settings.json`, {
@@ -394,7 +394,7 @@ function renderHome() {
       ];
 
   const runs = state.runs
-    .map((r) => `<tr><td>${new Date(r.created_at).toLocaleString("ko-KR", { month: "numeric", day: "numeric", hour: "2-digit", minute: "2-digit" })}</td><td>${r.event === "schedule" ? "예약" : "직접"}</td><td>${r.status === "completed" ? (r.conclusion === "success" ? "성공" : "실패") : "진행 중"}</td><td>${ext(esc(r.html_url), "기록", "text-link")}</td></tr>`)
+    .map((r) => `<tr><td>${new Date(r.created_at).toLocaleString("ko-KR", { month: "numeric", day: "numeric", hour: "2-digit", minute: "2-digit" })}</td><td>${r.event === "schedule" ? "예약" : "직접"}</td><td>${r.status === "completed" ? ({ success: "성공", cancelled: "건너뜀", skipped: "건너뜀" }[r.conclusion] ?? "실패") : "진행 중"}</td><td>${ext(esc(r.html_url), "기록", "text-link")}</td></tr>`)
     .join("");
 
   const week = (tone) => `<section class="band ${tone}"><div class="container">
@@ -464,6 +464,7 @@ function renderHome() {
       ${heroArt()}<div class="hero-wash"></div>
       <div class="container"><div class="hero-copy">
         ${state.status.lastBuyOk === false ? `<div class="notice">지난 실행이 실패했어요: ${esc(state.status.lastError)}</div>` : ""}
+        ${testModeBanner()}
         ${state.conn && balance !== undefined && balance < weekly ? `<div class="notice"><b>예치금이 모자라요.</b> 지금 ${won(balance)} · 한 주에 ${won(weekly)}이 필요합니다. 충전하지 않으면 이번 주는 사지 않습니다. ${ext("https://www.dhlottery.co.kr", "동행복권에서 충전하기 →", "text-link")}</div>` : ""}
         ${hero}
       </div>
@@ -671,7 +672,7 @@ function renderSettings() {
         <h3>내 메가로또 <span class="chip ok">연결됨</span></h3>
         <p style="margin:-6px 0 14px"><b>${esc(c.owner)}/${esc(c.repo)}</b> 저장소와 연결돼 있어요.</p>
         <div class="actions"><button class="action compact" data-run="buy">이번 주 것 지금 사기</button>${ext(`https://github.com/${esc(c.owner)}/${esc(c.repo)}/settings/secrets/actions`, "동행복권 계정 넣기·바꾸기", "action compact secondary")}${ext(`https://github.com/${esc(c.owner)}/${esc(c.repo)}/actions`, "실행 기록 보기", "action compact secondary")}<button class="action compact danger" id="disconnect">이 브라우저에서 연결 끊기</button></div>
-      </div>` : `<div class="card">
+      </div>` : `<div class="card" id="connectCard">
         <h3>내 메가로또 연결하기 <span class="chip">지금은 체험 화면</span></h3>
         <p class="help" style="margin-top:-6px">GitHub 열쇠를 하나 만들어 붙여 넣으면, 내 메가로또를 찾아 이 화면과 연결합니다. 열쇠는 이 브라우저에만 저장됩니다.</p>
         <div class="steps">
@@ -687,6 +688,7 @@ function renderSettings() {
       </div>`;
   return `${pageTitle("번호·설정", "어떤 번호로 살까요?", state.conn ? "바꾼 뒤 맨 아래 '설정 저장'을 누르면 다음 구매부터 적용됩니다." : "체험 화면에서는 이 브라우저에만 저장됩니다. 내 것으로 쓰려면 맨 아래에서 연결하세요.")}
     <div class="container page-body">
+      ${testModeBanner()}
       <div class="card">
         <h3>로또 번호 <small>한 주 최대 5게임 · 5,000원</small></h3>
         <div class="choices">
@@ -1079,6 +1081,48 @@ function stopGuide() {
     <small>이미 산 복권은 어떤 방법으로도 취소할 수 없습니다(동행복권 규정).</small></div>`;
 }
 
+/** 연결돼 있는데 아직 시험 모드면, 이번 주는 사지 않는다는 걸 크게 알리고 실제 구매로 넘어가게 한다 */
+function testModeBanner() {
+  const s = state.settings;
+  if (!state.conn || !s.autoBuy || !s.dryRun) return "";
+  const tested = state.status.lastBuyOk !== false && state.purchases.some((p) => p.dryRun && !p.demo);
+  return `<div class="notice alert"><b>${tested ? "시험 성공! 이제 실제 구매만 켜면 됩니다." : "지금은 시험 모드예요."}</b>
+    <p>${tested ? "로그인·예치금·번호 확인까지 잘 됐어요. " : ""}시험 모드에서는 <b>이번 주 복권을 실제로 사지 않습니다.</b></p>
+    <div class="actions"><button class="action compact" id="goReal">실제 구매 켜기 →</button>${tested ? "" : `<button class="action compact secondary" data-run="buy">시험 먼저 해 보기</button>`}</div></div>`;
+}
+
+/** 연결 안 된(체험) 화면에서 저장했을 때: 실제로는 아무것도 바뀌지 않았다는 걸 분명히 알린다 */
+function notConnectedDialog() {
+  const dlg = $("#dialog");
+  dlg.innerHTML = `<h3 style="margin:0 0 8px">아직 내 메가로또와 연결되지 않았어요</h3><p style="margin:0 0 8px">지금 화면은 <b>체험 화면</b>이라, 방금 설정은 <b>이 브라우저에만</b> 저장됐어요. 내 저장소의 설정은 <b>바뀌지 않았고</b>, 월요일 구매에도 반영되지 않습니다.</p><p class="help">GitHub 열쇠를 한 번 붙여 넣어 연결하면, 이 화면에서 바꾼 설정이 바로 내 메가로또에 저장됩니다.</p><div class="actions mt"><button class="action compact" id="yes">연결하러 가기</button><button class="action compact secondary" id="no">닫기</button></div>`;
+  dlg.onclick = (e) => {
+    if (e.target.id === "no") dlg.close();
+    if (e.target.id === "yes") {
+      dlg.close();
+      if (state.tab !== "settings") goTab("settings");
+      $("#connectCard")?.scrollIntoView({ block: "start", behavior: "smooth" });
+      $("#cToken")?.focus({ preventScroll: true });
+    }
+  };
+  dlg.showModal();
+}
+
+/** '실제 구매 켜기': 확인 → 설정 저장 → (고르면) 이번 주 것 바로 사기 */
+async function turnOnRealBuy() {
+  state.buyNow = false;
+  state.buyNowDecided = false;
+  if (!(await confirmReal())) return;
+  const next = normalizeSettings({ ...state.settings, autoBuy: true, dryRun: false });
+  await saveSettings(next);
+  state.draft = structuredClone(next);
+  render();
+  if (state.buyNow) {
+    state.buyNow = false;
+    await runTask("buy");
+    toast("실제 구매를 켰어요. 이번 주 복권을 지금 사는 중이에요. 2~3분 뒤 구매현황에서 확인하세요");
+  } else toast("실제 구매를 켰어요. 다음 월요일 오전 9시 30분에 삽니다");
+}
+
 function confirmBuyNow() {
   return new Promise((resolve) => {
     const s = state.settings ?? {};
@@ -1184,7 +1228,8 @@ document.addEventListener("click", async (e) => {
           toast("이번 주 복권을 지금 사는 중이에요. 2~3분 뒤 구매현황에서 확인하세요");
         }
       }
-    } else if (t.id === "resetDraft") (state.draft = structuredClone(state.settings)), render();
+    } else if (t.id === "goReal") await turnOnRealBuy();
+    else if (t.id === "resetDraft") (state.draft = structuredClone(state.settings)), render();
     else if (t.id === "connect") {
       const token = $("#cToken").value.trim();
       if (!token) return toast("GitHub 열쇠를 붙여 넣어 주세요");

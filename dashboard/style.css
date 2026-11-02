@@ -218,6 +218,9 @@ input:focus, select:focus { outline: 2px solid var(--teal); outline-offset: -1px
 .empty { color: var(--sub); text-align: center; padding: 30px 10px; }
 .notice { background: #fdf6f0; border: 1px solid #ecc9ad; color: #8a3d12; border-radius: 4px; padding: 12px 14px; font-size: 14px; margin-bottom: 16px; }
 .notice.info { background: var(--soft); border-color: var(--line); color: var(--deep); }
+.notice.alert { background: #fdeceb; border-color: #e3a097; color: #8f1d12; font-size: 15px; padding: 16px 18px; }
+.notice.alert p { margin: 4px 0 12px; }
+.notice.alert .actions { margin: 0; }
 
 /* 운영 회사 */
 .maker { background: #0a0f14; color: #fff; padding: 64px 0; }

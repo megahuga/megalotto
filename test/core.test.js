@@ -5,7 +5,7 @@ import { acValue, analyzeLotto, analyzePension, lottoRank, passesFilters, pensio
 import { lottoDates, parseLottoLines, rsaEncryptHex } from "../src/dhlottery.js";
 import { buildLottoGames, buildPensionPlan, normalizeSettings } from "../src/picks.js";
 import { currentLottoRound, currentPensionRound, latestLottoRound, latestPensionRound, purchaseCycles } from "../src/time.js";
-import { taskForSchedule } from "../src/cli.js";
+import { taskForSchedule, msUntilBuyTime, doneThisWeek } from "../src/cli.js";
 
 const kst = (s) => new Date(`${s}+09:00`);
 
@@ -123,6 +123,27 @@ test("로또 추첨일·지급기한 계산", () => {
 });
 
 test("예약 시간 → 할 일", () => {
-  assert.deepEqual(taskForSchedule("30 0 * * 1"), ["buy"]);
+  for (const c of ["35 22 * * 0", "35 23 * * 0", "15 0 * * 1", "5 2 * * 1"]) assert.deepEqual(taskForSchedule(c), ["buy"]);
   assert.deepEqual(taskForSchedule("0 22 * * 6"), ["update", "check"]);
+});
+
+test("예약 구매는 월요일 오전 9시 30분(KST)까지 기다린다", () => {
+  assert.equal(msUntilBuyTime(new Date("2026-11-01T22:35:00Z")), 115 * 60000); // 월 07:35 KST
+  assert.equal(msUntilBuyTime(new Date("2026-11-02T00:15:00Z")), 15 * 60000); // 월 09:15 KST
+  assert.equal(msUntilBuyTime(new Date("2026-11-02T00:31:00Z")), 0); // 지났으면 바로
+  assert.equal(msUntilBuyTime(new Date("2026-11-02T02:05:00Z")), 0);
+  assert.equal(msUntilBuyTime(new Date("2026-11-01T12:00:00Z")), 0); // 너무 이르면 기다리지 않음
+});
+
+test("이번 주 기록이 있으면 다시 사지 않는다 (실제·시험 따로)", () => {
+  const settings = { lotto: { enabled: true, slots: ["auto"] }, pension: { enabled: true } };
+  const rounds = { lotto: 1249, pension: 340 };
+  const bought = [
+    { product: "lotto", round: 1249, dryRun: false },
+    { product: "pension", round: 340, dryRun: false }
+  ];
+  assert.equal(doneThisWeek(settings, bought, { ...rounds, dryRun: false }), true);
+  assert.equal(doneThisWeek(settings, bought, { ...rounds, dryRun: true }), false);
+  assert.equal(doneThisWeek(settings, bought.slice(0, 1), { ...rounds, dryRun: false }), false);
+  assert.equal(doneThisWeek({ ...settings, pension: { enabled: false } }, bought.slice(0, 1), { ...rounds, dryRun: false }), true);
 });

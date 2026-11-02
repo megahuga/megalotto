@@ -136,6 +136,19 @@ export async function runBuy({ force = false } = {}) {
   const purchases = await readJson(purchasesPath, []);
   const lottoRound = currentLottoRound();
   const pensionRound = currentPensionRound();
+
+  if (!force) {
+    // 예약 실행은 여러 번 깨므로, 이번 주 기록이 이미 있으면 로그인하지 않고 끝낸다
+    if (doneThisWeek(settings, purchases, { lotto: lottoRound.round, pension: pensionRound.round, dryRun })) {
+      log("이번 주 구매 기록이 이미 있어 건너뜁니다.");
+      return;
+    }
+    const wait = msUntilBuyTime();
+    if (wait > 0) {
+      log(`월요일 오전 9시 30분까지 ${Math.ceil(wait / 60000)}분 기다립니다.`);
+      await new Promise((resolve) => setTimeout(resolve, wait));
+    }
+  }
   const cycles = purchaseCycles();
   const lines = [];
   const { id, pw } = credentials();
@@ -250,10 +263,30 @@ export async function runDiagnose() {
   await notify("동행복권 접속 점검", lines);
 }
 
+/** 구매 예약(cron). 워크플로 파일과 같아야 한다 */
+export const BUY_SCHEDULES = ["35 22 * * 0", "35 23 * * 0", "15 0 * * 1", "5 2 * * 1"];
+
 /** Actions 예약 시간(cron)에 맞춰 할 일을 고른다 */
 export function taskForSchedule(schedule) {
-  if (schedule === "30 0 * * 1") return ["buy"];
+  if (BUY_SCHEDULES.includes(schedule)) return ["buy"];
   return ["update", "check"];
+}
+
+/** 월요일 오전 9시 30분(KST = 월 00:30 UTC)까지 남은 시간(ms). 지났거나 3시간보다 멀면 0 */
+export function msUntilBuyTime(now = new Date()) {
+  const target = new Date(now);
+  if (now.getUTCDay() === 0) target.setUTCDate(target.getUTCDate() + 1); // 월요일 KST 이른 아침은 UTC로 아직 일요일
+  target.setUTCHours(0, 30, 0, 0);
+  const ms = target - now;
+  return ms > 0 && ms <= 3 * 3600_000 ? ms : 0;
+}
+
+/** 이번 주 회차를 이미 (같은 방식: 실제/시험으로) 산 기록이 있는가 */
+export function doneThisWeek(settings, purchases, { lotto, pension, dryRun }) {
+  const has = (product, round) => purchases.some((p) => p.product === product && p.round === round && !p.demo && !!p.dryRun === !!dryRun);
+  const lottoDone = !settings.lotto.enabled || !settings.lotto.slots.length || has("lotto", lotto);
+  const pensionDone = !settings.pension.enabled || has("pension", pension);
+  return lottoDone && pensionDone;
 }
 
 async function main() {

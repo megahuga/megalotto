@@ -3,7 +3,13 @@ name: 메가로또·메가연금
 on:
   schedule:
     - cron: "0 22 * * 6"  # 일 07:00 KST  로또 당첨번호 반영·분석·당첨 확인
-    - cron: "30 0 * * 1"  # 월 09:30 KST  이번 주 로또 5게임 + 연금 5장 구매 (정각은 GitHub가 붐벼 늦어지기 쉬움)
+    # 월 09:30 KST 구매. GitHub 예약 실행은 몇 시간씩 늦게 시작할 때가 있어서
+    # 일찍 여러 번 깨워 두고, 먼저 깬 실행이 9시 30분까지 기다렸다가 산다.
+    # 뒤에 깬 실행은 이번 주 구매 기록을 보고 로그인 없이 끝난다.
+    - cron: "35 22 * * 0" # 월 07:35 KST
+    - cron: "35 23 * * 0" # 월 08:35 KST
+    - cron: "15 0 * * 1"  # 월 09:15 KST
+    - cron: "5 2 * * 1"   # 월 11:05 KST  (앞 실행이 모두 늦거나 실패했을 때)
     - cron: "30 11 * * 4" # 목 20:30 KST  연금 당첨번호 반영·당첨 확인
   workflow_dispatch:
     inputs:
@@ -23,7 +29,7 @@ concurrency:
 jobs:
   run:
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 150 # 9시 30분까지 기다리는 시간 포함
     steps:
       - uses: actions/checkout@v4
 
