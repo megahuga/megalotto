@@ -522,3 +522,4 @@ details .terms-note { margin: 10px 0 4px; }
 .howto .card p { margin: 0; line-height: 1.65; }
 .howto-jump { margin: 0 0 12px; font-size: 14.5px; font-weight: 700; }
 .howto-jump a { color: inherit; text-decoration: underline; }
+.token-guide img { display: block; width: 100%; max-width: 640px; margin-top: 10px; border: 1px solid var(--line); border-radius: 4px; }

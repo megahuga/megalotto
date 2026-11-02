@@ -113,7 +113,7 @@ async function gh(path, { method = "GET", body, raw = false } = {}) {
 const TOKEN_URL = `https://github.com/settings/personal-access-tokens/new?${new URLSearchParams({
   name: "메가로또 화면 연결",
   description: "메가로또 대시보드가 내 메가로또 저장소의 설정·기록을 읽고 실행 버튼을 누르는 데 씁니다.",
-  expires_in: "366",
+  expires_in: "365",
   contents: "write",
   actions: "write"
 })}`;
@@ -125,6 +125,8 @@ async function findMegalottoRepo(token) {
   if (!res.ok) throw new Error(res.status === 401 ? "열쇠가 맞지 않아요. 다시 복사해 주세요" : `GitHub ${res.status}`);
   const repos = (await res.json()).sort((a, b) => /lotto/i.test(b.name) - /lotto/i.test(a.name));
   for (const r of repos.slice(0, 30)) {
+    // 열쇠는 공개 저장소도 읽을 수 있어서, 모두가 복사해 가는 원본(메가허가 공개본)은 내 것으로 잡지 않는다
+    if (r.full_name.toLowerCase() === "megahuga/megalotto") continue;
     const check = await fetch(`https://api.github.com/repos/${r.full_name}/contents/.github/workflows/${WORKFLOW}`, { headers });
     if (check.ok) return r.full_name;
   }
@@ -677,7 +679,8 @@ function renderSettings() {
         <p class="help" style="margin-top:-6px">GitHub 열쇠를 하나 만들어 붙여 넣으면, 내 메가로또를 찾아 이 화면과 연결합니다. 열쇠는 이 브라우저에만 저장됩니다.</p>
         <div class="steps">
           <div class="step"><div><h3>GitHub 열쇠 만들기</h3><p>버튼을 누르면 GitHub 열쇠 만드는 화면이 열립니다. <b>Repository access</b>에서 <code>Only select repositories</code> → 내 메가로또 저장소를 고르고, <b>Permissions</b>에서 <code>Contents</code>와 <code>Actions</code>를 <code>Read and write</code>로 바꾼 뒤 <b>Generate token</b>을 누르세요.</p>
-            <div class="actions">${ext(TOKEN_URL, "GitHub 열쇠 만들기 →", "action compact")}</div></div></div>
+            <div class="actions">${ext(TOKEN_URL, "GitHub 열쇠 만들기 →", "action compact")}</div>
+            <details class="help mt token-guide" open><summary>GitHub 화면이 영어라 헷갈리면 — 그림으로 보기</summary><img src="assets/token-guide.png" alt="GitHub 열쇠 만들기 화면: 1 Only select repositories에서 내 메가로또 저장소 고르기, 2 Actions와 Contents가 Read and write인지 확인, 3 Generate token 누르고 github_pat_ 글자 복사" loading="lazy" /></details></div></div>
           <div class="step"><div><h3>열쇠 붙여 넣기</h3><p><code>github_pat_</code>로 시작하는 글자를 복사해 아래에 붙여 넣고 연결을 누르세요.</p>
             <div class="field" style="margin:0"><input type="password" id="cToken" placeholder="github_pat_로 시작하는 열쇠" autocomplete="off" /></div>
             <div class="actions mt"><button class="action" id="connect">연결하기</button></div>
@@ -1130,8 +1133,9 @@ function confirmBuyNow() {
     const dlg = $("#dialog");
     dlg.innerHTML = real
       ? `<h3 style="margin:0 0 8px">지금 이번 주 복권을 살까요?</h3><p style="margin:0 0 8px">월요일까지 기다리지 않고 <b>지금 바로</b> 동행복권 예치금으로 삽니다.<br />로또 최대 5,000원 + 연금 5,000원 = <b>최대 10,000원</b></p><p class="help">이번 주 것을 이미 샀다면 다시 사지 않습니다. 산 복권은 취소할 수 없습니다.</p><div class="actions mt"><button class="action compact" id="yes">지금 사기</button><button class="action compact secondary" id="no">취소</button></div>`
-      : `<h3 style="margin:0 0 8px">시험 실행을 할까요?</h3><p style="margin:0 0 8px">지금은 <b>${s.autoBuy === false ? "잠시 멈춤" : "시험만 하기"}</b> 상태라 실제로 사지 않고, 로그인·예치금·번호까지만 확인합니다.</p><div class="actions mt"><button class="action compact" id="yes">시험 실행</button><button class="action compact secondary" id="no">취소</button></div>`;
+      : `<h3 style="margin:0 0 8px">지금은 ${s.autoBuy === false ? "잠시 멈춤" : "시험 모드"}예요</h3><p style="margin:0 0 8px">이대로 실행하면 <b>실제로 사지 않고</b> 로그인·예치금·번호까지만 확인합니다.</p><p class="help">이번 주 복권을 진짜로 사려면 <b>실제 구매를 켜고 지금 사기</b>를 누르세요. 로또 최대 5,000원 + 연금 5,000원 = 최대 10,000원이 예치금에서 나갑니다. 산 복권은 취소할 수 없습니다.</p><div class="actions mt"><button class="action compact" id="real">실제 구매 켜고 지금 사기</button><button class="action compact secondary" id="yes">시험만 해 보기</button><button class="action compact secondary" id="no">취소</button></div>`;
     dlg.onclick = (e) => {
+      if (e.target.id === "real") (dlg.close(), resolve("real"));
       if (e.target.id === "yes") (dlg.close(), resolve(true));
       if (e.target.id === "no") (dlg.close(), resolve(false));
     };
@@ -1182,7 +1186,19 @@ document.addEventListener("click", async (e) => {
     if (ds.tab) (e.preventDefault(), goTab(ds.tab), ds.scroll && $(`#${ds.scroll}`)?.scrollIntoView());
     else if (ds.scroll) (e.preventDefault(), $(`#${ds.scroll}`)?.scrollIntoView({ behavior: "smooth" }));
     else if (ds.run) {
-      if (ds.run === "buy" && state.conn && !(await confirmBuyNow())) return;
+      if (ds.run === "buy" && state.conn) {
+        const ok = await confirmBuyNow();
+        if (!ok) return;
+        if (ok === "real") {
+          const next = normalizeSettings({ ...state.settings, autoBuy: true, dryRun: false });
+          await saveSettings(next);
+          state.draft = structuredClone(next);
+          render();
+          await runTask("buy");
+          toast("실제 구매를 켰어요. 이번 주 복권을 지금 사는 중이에요. 2~3분 뒤 구매현황에서 확인하세요");
+          return;
+        }
+      }
       await runTask(ds.run);
     }
     else if (ds.share) await sharePurchase(ds.share);
