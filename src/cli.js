@@ -143,6 +143,11 @@ export async function runBuy({ force = false } = {}) {
       log("이번 주 구매 기록이 이미 있어 건너뜁니다.");
       return;
     }
+    const status = await readJson(file("data", "status.json"), {});
+    if (!dryRun && status.shortRound === lottoRound.round) {
+      log("이번 주는 예치금이 모자라 이미 알렸습니다. 충전 뒤 화면에서 '지금 사기'를 눌러 주세요.");
+      return;
+    }
     const wait = msUntilBuyTime();
     if (wait > 0) {
       log(`월요일 오전 9시 30분까지 ${Math.ceil(wait / 60000)}분 기다립니다.`);
@@ -152,6 +157,7 @@ export async function runBuy({ force = false } = {}) {
   const cycles = purchaseCycles();
   const lines = [];
   const { id, pw } = credentials();
+  const short = []; // 예치금이 모자라 못 산 것
 
   const session = await openSession();
   try {
@@ -166,6 +172,7 @@ export async function runBuy({ force = false } = {}) {
         lines.push(`로또 ${lottoRound.round}회: 이번 주 이미 ${already.reduce((a, x) => a + x.quantity, 0)}게임 구매 → 건너뜀`);
       } else if (balance < need && !dryRun) {
         lines.push(`로또: 예치금 부족(필요 ${won(need)}, 잔액 ${won(balance)}) → 충전해 주세요`);
+        short.push(`로또 ${won(need)}`);
       } else {
         const lottoAnalysis = analysis.lotto?.round === lottoRound.round ? analysis.lotto : null;
         if (!lottoAnalysis) lines.push(`분석번호가 ${lottoRound.round}회 기준이 아니라 분석 칸은 자동으로 삽니다`);
@@ -184,6 +191,7 @@ export async function runBuy({ force = false } = {}) {
         lines.push(`연금 ${pensionRound.round}회: 이번 주 이미 구매 → 건너뜀`);
       } else if (balance < 5000 && !dryRun) {
         lines.push(`연금: 예치금 부족(필요 5,000원, 잔액 ${won(balance)}) → 충전해 주세요`);
+        short.push("연금복권 5,000원");
       } else {
         const pensionAnalysis = analysis.pension?.round === pensionRound.round ? analysis.pension : null;
         const plan = buildPensionPlan(settings, pensionAnalysis);
@@ -196,7 +204,16 @@ export async function runBuy({ force = false } = {}) {
     }
 
     await writeJson(purchasesPath, purchases);
-    await saveStatus({ balance, balanceAt: nowIso(), lastBuy: nowIso(), lastBuyOk: true, lastError: null });
+    if (short.length) {
+      const message = `예치금이 모자라 이번 주 ${short.join(", ")}을(를) 사지 못했습니다. 잔액 ${won(balance)}. 동행복권에서 충전한 뒤 메가로또 화면에서 '지금 사기'를 누르면 이번 주 것을 바로 삽니다.`;
+      await saveStatus({ balance, balanceAt: nowIso(), lastBuy: nowIso(), lastBuyOk: false, lastError: message, shortRound: lottoRound.round });
+      await notify("메가로또: 예치금이 모자라 사지 못했어요", lines);
+      // 실행을 '실패'로 끝내면 GitHub가 계정 메일로 알려 준다. 이 줄은 그 메일과 실행 화면에 그대로 보인다
+      console.log(`::error title=예치금이 모자라 사지 못했어요::${message}`);
+      process.exitCode = 1;
+      return;
+    }
+    await saveStatus({ balance, balanceAt: nowIso(), lastBuy: nowIso(), lastBuyOk: true, lastError: null, shortRound: null });
     await notify(dryRun ? "메가로또 시험 실행" : "메가로또·메가연금 구매", lines);
   } catch (error) {
     await writeJson(purchasesPath, purchases);
