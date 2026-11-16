@@ -12,6 +12,7 @@ import { fileURLToPath } from "node:url";
 import { analyzeLotto, analyzePension, lottoRank, pensionRank } from "./analyze.js";
 import { fetchPensionDraws, updateLottoDraws } from "./draws.js";
 import { buyLotto, buyPension, getBalance, getLedger, login, openSession } from "./dhlottery.js";
+import { BUY_SCHEDULES, buyTiming } from "./buytime.js";
 import { buildLottoGames, buildPensionPlan, normalizeSettings } from "./picks.js";
 import { currentLottoRound, currentPensionRound, kstNow, purchaseCycles } from "./time.js";
 
@@ -148,10 +149,14 @@ export async function runBuy({ force = false } = {}) {
       log("이번 주는 예치금이 모자라 이미 알렸습니다. 충전 뒤 화면에서 '지금 사기'를 눌러 주세요.");
       return;
     }
-    const wait = msUntilBuyTime();
-    if (wait > 0) {
-      log(`월요일 오전 9시 30분까지 ${Math.ceil(wait / 60000)}분 기다립니다.`);
-      await new Promise((resolve) => setTimeout(resolve, wait));
+    const timing = buyTiming();
+    if (timing.state === "early") {
+      log("너무 일찍 깼어요. 9시 30분 직전에 깨는 다음 예약에 맡깁니다.");
+      return;
+    }
+    if (timing.state === "wait") {
+      log(`월요일 오전 9시 30분까지 ${Math.ceil(timing.ms / 60000)}분 기다립니다.`);
+      await new Promise((resolve) => setTimeout(resolve, timing.ms));
     }
   }
   const cycles = purchaseCycles();
@@ -280,22 +285,10 @@ export async function runDiagnose() {
   await notify("동행복권 접속 점검", lines);
 }
 
-/** 구매 예약(cron). 워크플로 파일과 같아야 한다 */
-export const BUY_SCHEDULES = ["35 22 * * 0", "35 23 * * 0", "15 0 * * 1", "5 2 * * 1"];
-
 /** Actions 예약 시간(cron)에 맞춰 할 일을 고른다 */
 export function taskForSchedule(schedule) {
   if (BUY_SCHEDULES.includes(schedule)) return ["buy"];
   return ["update", "check"];
-}
-
-/** 월요일 오전 9시 30분(KST = 월 00:30 UTC)까지 남은 시간(ms). 지났거나 3시간보다 멀면 0 */
-export function msUntilBuyTime(now = new Date()) {
-  const target = new Date(now);
-  if (now.getUTCDay() === 0) target.setUTCDate(target.getUTCDate() + 1); // 월요일 KST 이른 아침은 UTC로 아직 일요일
-  target.setUTCHours(0, 30, 0, 0);
-  const ms = target - now;
-  return ms > 0 && ms <= 3 * 3600_000 ? ms : 0;
 }
 
 /** 이번 주 회차를 이미 (같은 방식: 실제/시험으로) 산 기록이 있는가 */
@@ -313,8 +306,6 @@ async function main() {
   for (const task of tasks) {
     if (task === "update") await runUpdate();
     else if (task === "buy") await runBuy({ force: flag === "--force" || process.env.FORCE === "true" });
-    // 바깥 정시 시계(Vercel Cron)가 누르는 예약 구매: 예약 실행과 똑같이 9시 30분까지 기다리고, 샀거나 꺼져 있으면 건너뜀
-    else if (task === "scheduled-buy") await runBuy({ force: false });
     else if (task === "diagnose") await runDiagnose();
     else if (task === "check") await runCheck().catch((e) => log("잔액 확인 실패:", e.message));
     else throw new Error(`모르는 명령: ${task}`);

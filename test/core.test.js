@@ -5,7 +5,8 @@ import { acValue, analyzeLotto, analyzePension, lottoRank, passesFilters, pensio
 import { lottoDates, parseLottoLines, rsaEncryptHex } from "../src/dhlottery.js";
 import { buildLottoGames, buildPensionPlan, normalizeSettings } from "../src/picks.js";
 import { currentLottoRound, currentPensionRound, latestLottoRound, latestPensionRound, purchaseCycles } from "../src/time.js";
-import { taskForSchedule, msUntilBuyTime, doneThisWeek } from "../src/cli.js";
+import { taskForSchedule, doneThisWeek } from "../src/cli.js";
+import { buyTiming } from "../src/buytime.js";
 
 const kst = (s) => new Date(`${s}+09:00`);
 
@@ -123,16 +124,20 @@ test("로또 추첨일·지급기한 계산", () => {
 });
 
 test("예약 시간 → 할 일", () => {
-  for (const c of ["35 22 * * 0", "35 23 * * 0", "15 0 * * 1", "5 2 * * 1"]) assert.deepEqual(taskForSchedule(c), ["buy"]);
+  for (const c of ["35 10-23 * * 0", "15 0 * * 1", "5 2 * * 1"]) assert.deepEqual(taskForSchedule(c), ["buy"]);
   assert.deepEqual(taskForSchedule("0 22 * * 6"), ["update", "check"]);
 });
 
 test("예약 구매는 월요일 오전 9시 30분(KST)까지 기다린다", () => {
-  assert.equal(msUntilBuyTime(new Date("2026-11-01T22:35:00Z")), 115 * 60000); // 월 07:35 KST
-  assert.equal(msUntilBuyTime(new Date("2026-11-02T00:15:00Z")), 15 * 60000); // 월 09:15 KST
-  assert.equal(msUntilBuyTime(new Date("2026-11-02T00:31:00Z")), 0); // 지났으면 바로
-  assert.equal(msUntilBuyTime(new Date("2026-11-02T02:05:00Z")), 0);
-  assert.equal(msUntilBuyTime(new Date("2026-11-01T12:00:00Z")), 0); // 너무 이르면 기다리지 않음
+  const at = (iso) => buyTiming(new Date(iso));
+  assert.deepEqual(at("2026-11-01T23:35:00Z"), { state: "wait", ms: 55 * 60000 }); // 월 08:35 KST → 55분 기다림
+  assert.deepEqual(at("2026-11-02T00:15:00Z"), { state: "wait", ms: 15 * 60000 }); // 월 09:15 KST
+  assert.equal(at("2026-11-01T23:20:00Z").state, "wait"); // 70분 전까지는 기다림
+  assert.equal(at("2026-11-01T23:15:00Z").state, "early"); // 75분 전 → 다음 예약에 맡김
+  assert.equal(at("2026-11-01T22:35:00Z").state, "early"); // 월 07:35 KST → 다음 예약에 맡김
+  assert.equal(at("2026-11-01T10:35:00Z").state, "early"); // 일 19:35 KST
+  assert.equal(at("2026-11-02T00:31:00Z").state, "late"); // 지났으면 바로
+  assert.equal(at("2026-11-03T05:00:00Z").state, "late"); // 화요일에 깬 아주 늦은 예약
 });
 
 test("이번 주 기록이 있으면 다시 사지 않는다 (실제·시험 따로)", () => {
