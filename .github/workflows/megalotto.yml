@@ -16,7 +16,7 @@ on:
       task:
         description: "할 일"
         type: choice
-        options: [update, buy, check, diagnose]
+        options: [update, buy, scheduled-buy, check, diagnose]
         default: update
 
 permissions:

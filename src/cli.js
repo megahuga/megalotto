@@ -313,6 +313,8 @@ async function main() {
   for (const task of tasks) {
     if (task === "update") await runUpdate();
     else if (task === "buy") await runBuy({ force: flag === "--force" || process.env.FORCE === "true" });
+    // 바깥 정시 시계(Vercel Cron)가 누르는 예약 구매: 예약 실행과 똑같이 9시 30분까지 기다리고, 샀거나 꺼져 있으면 건너뜀
+    else if (task === "scheduled-buy") await runBuy({ force: false });
     else if (task === "diagnose") await runDiagnose();
     else if (task === "check") await runCheck().catch((e) => log("잔액 확인 실패:", e.message));
     else throw new Error(`모르는 명령: ${task}`);
