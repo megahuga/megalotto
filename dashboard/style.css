@@ -31,6 +31,7 @@ img { max-width: 100%; display: block; }
 /* 맨 위 띠 */
 .free-strip { padding: 7px 20px; background: var(--soft2); color: var(--sub); font-size: 12.5px; text-align: center; letter-spacing: 0; }
 .free-strip b { color: var(--ink); }
+.free-strip a { color: var(--ink); font-weight: 700; text-decoration: underline; text-underline-offset: 2px; }
 
 /* 머리줄 */
 .page-header { max-width: 1280px; margin: auto; display: flex; align-items: center; justify-content: space-between; gap: 22px; padding: 18px 42px; background: var(--white); }

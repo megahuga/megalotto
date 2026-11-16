@@ -454,7 +454,7 @@ function renderHome() {
        <h1>매주 복권 사기,<br />이제 잊어버리세요</h1>
        <p class="lead">매주 사러 가기 귀찮은 분을 위해 만들었습니다. 월요일 오전 9시 30분, 내 동행복권 계정으로 로또 5게임과 연금복권 5장을 대신 삽니다. 번호는 <b>자동</b>으로 두거나 <b>내 번호</b>를 정해 두면 끝. 컴퓨터를 꺼 둬도 됩니다.</p>
        <div class="actions"><button class="action" data-tab="start">무료로 시작하기 <span class="arrow">→</span></button><a class="action secondary" href="#picks">번호 고르는 법 보기</a></div>
-       <p class="hero-note">충주에서 AI 회사를 하는 대표가, 회사를 알리려고 직접 쓰던 걸 무료로 공개했습니다. 내 GitHub에서 돌아가서 <b>저희는 돈도 받을 수 없고, 비밀번호도 볼 수 없습니다.</b></p>
+       <p class="hero-note">충주 AI 회사 <a class="text-link" href="https://mega.ai.kr" target="_blank" rel="noopener">(주)메가허가 AI</a>의 대표가, 회사를 알리려고 직접 쓰던 걸 무료로 공개했습니다. 내 GitHub에서 돌아가서 <b>저희는 돈도 받을 수 없고, 비밀번호도 볼 수 없습니다.</b></p>
        <p class="terms-mini">⚠️ 자동 구매는 동행복권 이용약관상 <b>계정 이용 제한 사유</b>가 될 수 있습니다. <a href="#terms" data-tab="start">쓰기 전에 읽기</a></p>`;
 
   const facts = state.conn
@@ -467,7 +467,7 @@ function renderHome() {
     : [
         ["이용료", "무료", "결제창 없음 · 앞으로도 0원"],
         ["한 주 금액", "10,000원", "로또 5천 + 연금 5천"],
-        ["다음 구매", nextBuyText().replace(" 오전 9시 30분", ""), "오전 9시 30분 자동"],
+        ["다음 구매", nextBuyText().replace(" 오전 9시 30분", ""), "오전 9시 30분 자동 · 늦어질 수 있음"],
         ["번호", "자동 · 내 번호", "분석번호도 고를 수 있어요"]
       ];
 
@@ -519,7 +519,7 @@ function renderHome() {
       </div>
       <ol class="timeline">
         <li><span>일요일 오전 7시</span><b>당첨번호 받고 분석</b><p>1회부터 최신 회차까지 다시 분석해 이번 주 분석번호 5게임을 만듭니다.</p></li>
-        <li><span>월요일 오전 9시 30분</span><b>로또 5게임 + 연금 5장 구매</b><p>이미 샀으면 다시 사지 않고, 예치금이 모자라면 사지 않고 알려 줍니다.</p></li>
+        <li><span>월요일 오전 9시 30분</span><b>로또 5게임 + 연금 5장 구매</b><p>이미 샀으면 다시 사지 않고, 예치금이 모자라면 사지 않고 메일로 알려 줍니다. GitHub가 붐비면 몇 시간 늦게 사기도 합니다.</p></li>
         <li><span>추첨 다음 날</span><b>당첨 확인</b><p>연금은 목요일, 로또는 토요일 추첨 뒤 구매현황에 등수를 표시합니다.</p></li>
       </ol>
     </div></section>`;
@@ -793,6 +793,7 @@ function renderSettings() {
 
       <div class="card mt">
         <h3>매주 월요일 오전 9시 30분에</h3>
+        <p class="help" style="margin-top:-6px">GitHub가 붐비면 몇 시간 늦게 사기도 합니다. 그날 안 사졌으면 화면의 <b>[지금 구매 실행]</b>으로 바로 살 수 있어요.</p>
         <div class="radio-list">
           <label><input type="radio" name="runmode" value="buy" ${d.autoBuy && !d.dryRun ? "checked" : ""} /><span><b>자동으로 사기</b><small>예치금으로 이번 주 복권을 삽니다. 산 복권은 취소할 수 없어요.</small></span></label>
           <label><input type="radio" name="runmode" value="test" ${d.autoBuy && d.dryRun ? "checked" : ""} /><span><b>시험만 하기 (사지 않음)</b><small>로그인·예치금·번호까지만 확인합니다. 처음 연결했을 때 한 번 해 보세요.</small></span></label>
@@ -882,7 +883,7 @@ function renderStart() {
       <div class="band" style="padding-bottom:0">
         ${secHead("사용법", "설정이 끝나면, 이렇게 씁니다")}
         <div class="grid g2 howto">
-          <div class="card"><h3>1. 그냥 두면 됩니다</h3><p>매주 <b>월요일 오전 9시 30분</b>에 알아서 삽니다. 로또 당첨 확인은 <b>일요일 아침</b>, 연금복권은 <b>목요일 밤</b>에 알아서 합니다.</p></div>
+          <div class="card"><h3>1. 그냥 두면 됩니다</h3><p>매주 <b>월요일 오전 9시 30분</b>에 알아서 삽니다. 로또 당첨 확인은 <b>일요일 아침</b>, 연금복권은 <b>목요일 밤</b>에 알아서 합니다.</p><p class="help">GitHub가 붐비면 몇 시간 늦게 사기도 합니다. 그날 안 사졌으면 화면의 <b>[지금 구매 실행]</b>으로 바로 살 수 있어요.</p></div>
           <div class="card"><h3>2. 이번 주 번호 보기</h3><p>첫 화면 <b>'이번 주에 살 번호'</b>에 이번 주에 살 번호가 미리 나와 있습니다.</p></div>
           <div class="card"><h3>3. 산 것·당첨 결과 보기</h3><p>위 메뉴 <b>구매현황</b>에서 산 번호와 등수를 봅니다. 당첨금은 동행복권 사이트 마이페이지에서 확인하고 받으세요.</p></div>
           <div class="card"><h3>4. 번호 바꾸기</h3><p><b>번호·설정</b>에서 게임마다 분석번호·저장번호·무작위·자동을 고르고 맨 아래 <b>설정 저장</b>. 다음 구매부터 바뀝니다.</p></div>
